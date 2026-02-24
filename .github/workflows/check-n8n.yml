@@ -5,51 +5,146 @@ on:
     # Runs every 13 minutes (at minutes 0, 13, 26, 39, 52 of every hour)
     - cron: '*/13 * * * *'
   workflow_dispatch:  # Allows manual trigger for testing
+  repository_dispatch:  # Allows external triggering
+    types: [run-monitor]
+
+# Add permissions to ensure the workflow can run
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   check-n8n-health:
     runs-on: ubuntu-latest
     
+    # Add timeout to prevent hanging jobs
+    timeout-minutes: 5
+    
     steps:
+      # Step 1: Validate all required secrets are present
+      - name: Validate secrets
+        run: |
+          MISSING_SECRETS=""
+          
+          if [ -z "${{ secrets.N8N_WEBHOOK_URL }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- N8N_WEBHOOK_URL\n"
+          fi
+          
+          if [ -z "${{ secrets.N8N_USERNAME }}" ]; then
+            # Try hardcoded as fallback
+            echo "⚠️ N8N_USERNAME secret not found, using hardcoded 'admin'"
+          fi
+          
+          if [ -z "${{ secrets.N8N_PASSWORD }}" ]; then
+            # Try hardcoded as fallback
+            echo "⚠️ N8N_PASSWORD secret not found, using hardcoded '123'"
+          fi
+          
+          if [ -z "${{ secrets.TELEGRAM_BOT_TOKEN }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- TELEGRAM_BOT_TOKEN\n"
+          fi
+          
+          if [ -z "${{ secrets.TELEGRAM_CHAT_ID }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- TELEGRAM_CHAT_ID\n"
+          fi
+          
+          if [ ! -z "$MISSING_SECRETS" ]; then
+            echo "❌ Missing required secrets:"
+            echo -e "$MISSING_SECRETS"
+            echo "Please add them in: Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          
+          echo "✅ All required secrets are present"
+          echo "📡 Webhook URL: ${{ secrets.N8N_WEBHOOK_URL }}"
+      
+      # Step 2: Check current time and trigger source
       - name: Check current time
         run: |
           echo "🕐 Checking n8n workflow at $(date)"
+          echo "📢 Triggered by: ${{ github.event_name }}"
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            echo "⏰ This is an automated cron run"
+          else
+            echo "👤 This is a manual trigger"
+          fi
       
+      # Step 3: Call n8n webhook with retry logic
       - name: Call n8n webhook
         id: n8n_request
         run: |
           echo "📡 Sending request to n8n..."
           
-          # Using credentials from secrets (recommended)
-          response=$(curl -s -w "\n%{http_code}" -X POST \
-            -u "${{ secrets.N8N_USERNAME }}:${{ secrets.N8N_PASSWORD }}" \
-            -H "Content-Type: application/json" \
-            -H "User-Agent: GitHub-Actions" \
-            "${{ secrets.N8N_WEBHOOK_URL }}")
+          # Set credentials (prefer secrets, fallback to hardcoded)
+          if [ ! -z "${{ secrets.N8N_USERNAME }}" ] && [ ! -z "${{ secrets.N8N_PASSWORD }}" ]; then
+            AUTH_STRING="${{ secrets.N8N_USERNAME }}:${{ secrets.N8N_PASSWORD }}"
+            echo "🔐 Using credentials from secrets"
+          else
+            AUTH_STRING="admin:123"
+            echo "🔐 Using hardcoded credentials (admin:123)"
+          fi
           
-          # Alternative: using hardcoded credentials (if you didn't create secrets)
-          # response=$(curl -s -w "\n%{http_code}" -X POST \
-          #   -u "admin:123" \
-          #   -H "Content-Type: application/json" \
-          #   "${{ secrets.N8N_WEBHOOK_URL }}")
-          
-          # Split response into body and status code
-          http_code=$(echo "$response" | tail -n1)
-          response_body=$(echo "$response" | sed '$d')
-          
-          # Save for later steps
-          echo "status=$http_code" >> $GITHUB_OUTPUT
-          echo "body=$response_body" >> $GITHUB_OUTPUT
-          
-          # Display results
-          echo "✅ HTTP Status: $http_code"
-          echo "📦 Response: $response_body"
-          
-          # Also save full response for debugging
-          echo "full_response<<EOF" >> $GITHUB_OUTPUT
-          echo "$response" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Try up to 3 times with exponential backoff
+          for attempt in 1 2 3; do
+            echo ""
+            echo "📡 Attempt $attempt of 3..."
+            
+            # Make the request with verbose output for debugging
+            response=$(curl -v -s -w "\n%{http_code}" -X POST \
+              -u "$AUTH_STRING" \
+              -H "Content-Type: application/json" \
+              -H "User-Agent: GitHub-Actions" \
+              -H "X-GitHub-Run: ${{ github.run_id }}" \
+              --connect-timeout 30 \
+              --max-time 60 \
+              "${{ secrets.N8N_WEBHOOK_URL }}" 2>&1)
+            
+            # Get the last line (status code)
+            http_code=$(echo "$response" | tail -n1)
+            
+            # Get everything except the last line (response body + curl verbose output)
+            full_output=$(echo "$response" | sed '$d')
+            
+            # Try to extract just the JSON response body
+            response_body=$(echo "$full_output" | grep -o '{.*}' | head -1)
+            
+            # If no JSON found, use the last non-verbose line
+            if [ -z "$response_body" ]; then
+              response_body=$(echo "$full_output" | grep -v '^*' | grep -v '^>' | grep -v '^<' | tail -1)
+            fi
+            
+            echo "HTTP Status: $http_code"
+            echo "Response Body: $response_body"
+            
+            # Check if successful
+            if [ "$http_code" == "200" ]; then
+              echo "✅ Request successful on attempt $attempt"
+              echo "status=$http_code" >> $GITHUB_OUTPUT
+              echo "body=$response_body" >> $GITHUB_OUTPUT
+              
+              # Also save full output for debugging
+              echo "full_response<<EOF" >> $GITHUB_OUTPUT
+              echo "$full_output" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+              
+              # Break out of retry loop
+              break
+            else
+              echo "❌ Request failed on attempt $attempt"
+              
+              if [ $attempt -lt 3 ]; then
+                wait_time=$((attempt * 10))
+                echo "Waiting ${wait_time} seconds before retry..."
+                sleep $wait_time
+              else
+                # All attempts failed
+                echo "status=$http_code" >> $GITHUB_OUTPUT
+                echo "body=All retry attempts failed - Last response: $response_body" >> $GITHUB_OUTPUT
+              fi
+            fi
+          done
       
+      # Step 4: Validate the response
       - name: Validate response
         id: validation
         run: |
@@ -57,18 +152,28 @@ jobs:
           BODY='${{ steps.n8n_request.outputs.body }}'
           
           echo "🔍 Validating response..."
+          echo "Status Code: $STATUS"
+          echo "Response Body: $BODY"
           
-          # Check if status is 200 and body contains success:true
-          if [ "$STATUS" == "200" ] && [[ "$BODY" == *"success"* ]] && [[ "$BODY" == *"true"* ]]; then
-            echo "✅ n8n workflow is healthy!"
-            echo "alert_needed=false" >> $GITHUB_OUTPUT
-            echo "message=All good!" >> $GITHUB_OUTPUT
+          # Check if status is 200
+          if [ "$STATUS" == "200" ]; then
+            # Check if body contains success:true
+            if [[ "$BODY" == *"success"* ]] && [[ "$BODY" == *"true"* ]]; then
+              echo "✅ n8n workflow is healthy!"
+              echo "alert_needed=false" >> $GITHUB_OUTPUT
+              echo "message=✅ n8n is healthy - $(date)" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Response body missing success:true"
+              echo "alert_needed=true" >> $GITHUB_OUTPUT
+              echo "message=❌ Invalid response - Expected {success: true}, got: $BODY" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "❌ n8n workflow check failed!"
+            echo "❌ HTTP status code $STATUS (expected 200)"
             echo "alert_needed=true" >> $GITHUB_OUTPUT
-            echo "message=Check failed - Status: $STATUS, Response: $BODY" >> $GITHUB_OUTPUT
+            echo "message=❌ HTTP $STATUS - n8n may be down" >> $GITHUB_OUTPUT
           fi
       
+      # Step 5: Send Telegram alert on failure
       - name: Send Telegram alert on failure
         if: steps.validation.outputs.alert_needed == 'true'
         env:
@@ -79,37 +184,68 @@ jobs:
         run: |
           echo "📱 Sending Telegram alert..."
           
-          # Format the message
+          # Format the message (URL encoded)
           MESSAGE="🚨 *n8n Monitor Alert* 🚨%0A"
-          MESSAGE="${MESSAGE}Time: $(date -u)%0A"
-          MESSAGE="${MESSAGE}Status: HTTP ${STATUS}%0A"
-          MESSAGE="${MESSAGE}Response: ${BODY}%0A"
-          MESSAGE="${MESSAGE}Expected: {success: true} with 200 status%0A"
-          MESSAGE="${MESSAGE}Repository: ${{ github.repository }}%0A"
-          MESSAGE="${MESSAGE}Workflow: ${{ github.workflow }}"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━%0A"
+          MESSAGE="${MESSAGE}⏰ *Time:* $(date -u)%0A"
+          MESSAGE="${MESSAGE}🔍 *Status:* HTTP ${STATUS}%0A"
+          MESSAGE="${MESSAGE}📦 *Response:* ${BODY}%0A"
+          MESSAGE="${MESSAGE}✅ *Expected:* {success: true}%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━%0A"
+          MESSAGE="${MESSAGE}📂 *Repo:* ${{ github.repository }}%0A"
+          MESSAGE="${MESSAGE}⚙️ *Workflow:* ${{ github.workflow }}%0A"
+          MESSAGE="${MESSAGE}🆔 *Run ID:* ${{ github.run_id }}%0A"
+          MESSAGE="${MESSAGE}━━━━━━━━━━━━━━━━%0A"
+          MESSAGE="${MESSAGE}🔗 *Link:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           
           # Send to Telegram
-          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
             -d chat_id="${TELEGRAM_CHAT}" \
             -d text="${MESSAGE}" \
-            -d parse_mode="Markdown"
+            -d parse_mode="Markdown")
           
-          echo "✅ Alert sent!"
+          # Check if message was sent successfully
+          if [[ "$RESPONSE" == *"\"ok\":true"* ]]; then
+            echo "✅ Alert sent successfully!"
+          else
+            echo "❌ Failed to send alert: $RESPONSE"
+          fi
       
-      - name: Send success notification (optional)
-        if: steps.validation.outputs.alert_needed == 'false'
-        run: |
-          echo "✅ n8n is healthy - no alert needed"
-          # You could also send a daily success report if needed
+      # Step 6: Send success notification (optional - uncomment if you want success alerts)
+      # - name: Send Telegram success notification (optional)
+      #   if: steps.validation.outputs.alert_needed == 'false'
+      #   env:
+      #     TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      #     TELEGRAM_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+      #   run: |
+      #     echo "📱 Sending success notification..."
+      #     MESSAGE="✅ *n8n is healthy*%0A"
+      #     MESSAGE="${MESSAGE}Time: $(date -u)%0A"
+      #     MESSAGE="${MESSAGE}Status: HTTP 200 with success:true"
+      #     curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+      #       -d chat_id="${TELEGRAM_CHAT}" \
+      #       -d text="${MESSAGE}" \
+      #       -d parse_mode="Markdown"
       
+      # Step 7: Summary
       - name: Summary
         run: |
           echo "═══════════════════════════════════════"
           echo "📊 MONITORING SUMMARY"
           echo "═══════════════════════════════════════"
           echo "🕐 Time: $(date)"
+          echo "📢 Trigger: ${{ github.event_name }}"
           echo "📡 Webhook: ${{ secrets.N8N_WEBHOOK_URL }}"
           echo "📟 Status: ${{ steps.n8n_request.outputs.status }}"
           echo "📦 Response: ${{ steps.n8n_request.outputs.body }}"
           echo "🚨 Alert sent: ${{ steps.validation.outputs.alert_needed }}"
+          echo "📝 Message: ${{ steps.validation.outputs.message }}"
           echo "═══════════════════════════════════════"
+          
+          # Final exit code (fail if alert was needed)
+          if [ "${{ steps.validation.outputs.alert_needed }}" == "true" ]; then
+            echo "❌ Monitoring check failed"
+            exit 1
+          else
+            echo "✅ Monitoring check passed"
+          fi
