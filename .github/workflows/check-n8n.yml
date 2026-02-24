@@ -3,7 +3,7 @@ name: Monitor n8n Workflow
 on:
   schedule:
     # Runs every 13 minutes (at minutes 0, 13, 26, 39, 52 of every hour)
-    - cron: '*/13 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:  # Allows manual trigger for testing
 
 jobs:
