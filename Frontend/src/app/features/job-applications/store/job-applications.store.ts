@@ -79,7 +79,7 @@ export const JobApplicationsStore = signalStore(
         totalCount: computed(() => {
             // Apply same filtering logic as filteredJobs but don't return the full array
             let jobs = [...service.jobs()];
-            
+
             // Text search
             const term = state.searchTerm().toLowerCase().trim();
             if (term) {
@@ -92,19 +92,19 @@ export const JobApplicationsStore = signalStore(
                         j.status.toLowerCase().includes(term)
                 );
             }
-            
+
             // Status filter
             const statusFilter = state.statusFilter();
             if (statusFilter && statusFilter.length > 0) {
                 jobs = jobs.filter((j) => statusFilter.includes(j.status));
             }
-            
+
             return jobs.length;
         }),
         pagedJobs: computed(() => {
             // Apply same filtering logic as filteredJobs
             let jobs = [...service.jobs()];
-            
+
             // Text search
             const term = state.searchTerm().toLowerCase().trim();
             if (term) {
@@ -117,13 +117,13 @@ export const JobApplicationsStore = signalStore(
                         j.status.toLowerCase().includes(term)
                 );
             }
-            
+
             // Status filter
             const statusFilter = state.statusFilter();
             if (statusFilter && statusFilter.length > 0) {
                 jobs = jobs.filter((j) => statusFilter.includes(j.status));
             }
-            
+
             // Sort
             const col = state.sortColumn() as keyof typeof jobs[0];
             const dir = state.sortDirection();
@@ -133,13 +133,11 @@ export const JobApplicationsStore = signalStore(
                 const cmp = aVal.localeCompare(bVal);
                 return dir === 'asc' ? cmp : -cmp;
             });
-            
+
             const start = state.currentPage() * state.pageSize();
             const end = start + state.pageSize();
             return jobs.slice(start, end);
-        }),
-        pageSize: computed(() => state.pageSize()),
-        currentPage: computed(() => state.currentPage())
+        })
     })),
     withMethods((store) => ({
         setSearchTerm(term: string): void {

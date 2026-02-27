@@ -16,15 +16,13 @@ import { JobApplicationService } from '../../features/job-applications/api/job-a
 import { JobApplicationsStore } from '../../features/job-applications/store/job-applications.store';
 import {
   JobApplication,
-  JobStatus,
-  CreateJobPayload,
-  PointOfContact
+  JobStatus
 } from '../../features/job-applications/types/job-application.type';
 import {
   JOB_STATUS_OPTIONS,
   JOB_STATUS_COLORS,
 } from '../../features/job-applications/constants';
-import { formatDateForDisplay, formatDateForInput, formatDateConsistent } from '../../features/job-applications/utils/date-format.util';
+import { formatDateForInput, formatDateConsistent } from '../../features/job-applications/utils/date-format.util';
 import { EmptyStateComponent } from '../../features/job-applications/components/EmptyState/EmptyState.component';
 import { AddContactModalComponent } from '../../features/job-applications/components/add-contact-modal/add-contact-modal.component';
 import { TechStackModalComponent } from '../../features/job-applications/components/tech-stack-modal/tech-stack-modal.component';
@@ -49,8 +47,10 @@ import { ThemeService } from '../../core/services/theme.service';
     MatChipsModule,
     MatTooltipModule,
     MatPaginatorModule,
-    EmptyStateComponent,
+    CommonModule,
+    FormsModule,
     ReactiveFormsModule,
+    EmptyStateComponent,
   ],
 })
 export class JobTable {
@@ -59,6 +59,10 @@ export class JobTable {
   protected readonly themeService = inject(ThemeService);
   private readonly dialog = inject(Dialog);
   private readonly matDialog = inject(MatDialog);
+
+  protected readonly editingJobId = signal<string | null>(null);
+  protected readonly editingField = signal<string | null>(null);
+  private updateTimeout?: any;
 
   protected readonly statusOptions = JOB_STATUS_OPTIONS;
   protected readonly statusColors = JOB_STATUS_COLORS;
@@ -141,7 +145,6 @@ export class JobTable {
     const id = await this.service.addBlankJob();
     if (id) {
       this.store.setPage(0);
-      // Open modal to edit the new job
       const job = this.service.jobs().find(j => j.id === id);
       if (job) {
         this.openJobModal(job);
@@ -215,26 +218,18 @@ export class JobTable {
   }
 
   protected openJobModal(job: JobApplication): void {
-    // For now, just navigate to an edit view or show a notification
-    // We can implement a comprehensive job edit modal later if needed
     this.showSuccessToast(`Job created. Click on fields to edit.`);
   }
 
   protected onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       this.saveEditing();
-    } else if (event.key === 'Escape') {
-      // Do nothing since we removed the inline editing
     }
   }
-
-
 
   protected hasLink(job: JobApplication): boolean {
     return !!(job.linkedInUrl || job.resumeUrl || job.coverLetterUrl);
   }
-
-
 
   protected readonly lastDeletedJob = signal<JobApplication | null>(null);
   protected readonly showUndoNotification = signal(false);
@@ -263,8 +258,27 @@ export class JobTable {
     this.deleteJob(job.id);
   }
 
+  protected startEditing(jobId: string, field: string): void {
+    this.editingJobId.set(jobId);
+    this.editingField.set(field);
+  }
+
+  protected stopEditing(): void {
+    this.editingJobId.set(null);
+    this.editingField.set(null);
+    if (this.updateTimeout) clearTimeout(this.updateTimeout);
+  }
+
+  protected onFieldUpdate(jobId: string, field: string, value: any): void {
+    if (this.updateTimeout) clearTimeout(this.updateTimeout);
+
+    this.updateTimeout = setTimeout(() => {
+      this.service.updateJobField(jobId, field as any, value);
+    }, 1000);
+  }
+
   protected saveEditing(): void {
-    // Do nothing since we removed the inline editing
+    this.stopEditing();
   }
 
   protected showSuccessToast(message: string): void {
