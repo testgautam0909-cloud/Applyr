@@ -1,27 +1,6 @@
 <div class="page-container">
-  <!-- Header -->
-  <header class="page-header">
-    <div class="header-content">
-      <div class="header-title-block">
-        <mat-icon class="header-icon">work</mat-icon>
-        <div>
-          <h1>Job Application Tracker</h1>
-          <p class="subtitle">Track and manage your job applications</p>
-        </div>
-      </div>
-
-      <div class="header-actions">
-
-        <button mat-icon-button (click)="themeService.toggleTheme()"
-          [matTooltip]="themeService.theme() === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
-          <mat-icon>{{ themeService.theme() === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
-        </button>
-      </div>
-    </div>
-  </header>
 
   @if (store['hasJobs']()) {
-  <!-- Toolbar: Search + Pill Filters -->
   <div class="toolbar">
     <div class="search-container">
       <mat-form-field appearance="outline" class="search-field">
@@ -49,260 +28,148 @@
     </div>
   </div>
 
-  <!-- Data Table -->
   <div class="table-wrapper">
     <table mat-table [dataSource]="store['pagedJobs']()" class="job-table">
 
-      <!-- Job Title -->
       <ng-container matColumnDef="jobTitle">
         <th mat-header-cell *matHeaderCellDef class="sortable-header" (click)="onSort('jobTitle')">
           Job Title
           <mat-icon class="sort-icon">{{ getSortIcon('jobTitle') }}</mat-icon>
         </th>
-        <td mat-cell *matCellDef="let job" (click)="startEditing(job.id, 'jobTitle', job.jobTitle)"
-          data-label="Job Title">
-          @if (store['isEditing']()(job.id, 'jobTitle')) {
-          <input class="inline-input" [value]="editingValue()" (input)="editingValue.set($event.target.value)"
-            (keydown)="onKeyDown($event)" (blur)="saveEditing()" autofocus />
-          } @else {
-          <span class="cell-primary">{{ job.jobTitle || 'Click to edit...' }}</span>
-          }
+        <td mat-cell *matCellDef="let job" data-label="Job Title">
+          <span class="cell-primary">{{ job.jobTitle || 'No title' }}</span>
         </td>
       </ng-container>
 
-      <!-- Company -->
       <ng-container matColumnDef="company">
         <th mat-header-cell *matHeaderCellDef class="sortable-header" (click)="onSort('company')">
           Company
           <mat-icon class="sort-icon">{{ getSortIcon('company') }}</mat-icon>
         </th>
-        <td mat-cell *matCellDef="let job" (click)="startEditing(job.id, 'company', job.company)" data-label="Company">
-          @if (store['isEditing']()(job.id, 'company')) {
-          <input class="inline-input" [value]="editingValue()" (input)="editingValue.set($event.target.value)"
-            (keydown)="onKeyDown($event)" (blur)="saveEditing()" autofocus />
-          } @else {
-          {{ job.company || 'Click to edit...' }}
-          }
+        <td mat-cell *matCellDef="let job" data-label="Company">
+          {{ job.company || 'No company' }}
         </td>
       </ng-container>
 
-      <!-- Location -->
       <ng-container matColumnDef="location">
         <th mat-header-cell *matHeaderCellDef class="sortable-header" (click)="onSort('location')">
           Location
           <mat-icon class="sort-icon">{{ getSortIcon('location') }}</mat-icon>
         </th>
-        <td mat-cell *matCellDef="let job" (click)="startEditing(job.id, 'location', job.location)"
-          data-label="Location">
-          @if (store['isEditing']()(job.id, 'location')) {
-          <input class="inline-input" [value]="editingValue()" (input)="editingValue.set($event.target.value)"
-            (keydown)="onKeyDown($event)" (blur)="saveEditing()" autofocus />
-          } @else {
-          {{ job.location || 'Click to edit...' }}
-          }
+        <td mat-cell *matCellDef="let job" data-label="Location">
+          {{ job.location || 'No location' }}
         </td>
       </ng-container>
 
-      <!-- Tech Stack -->
       <ng-container matColumnDef="techStack">
         <th mat-header-cell *matHeaderCellDef class="sortable-header" (click)="onSort('techStack')">
           Tech Stack
           <mat-icon class="sort-icon">{{ getSortIcon('techStack') }}</mat-icon>
         </th>
         <td mat-cell *matCellDef="let job" data-label="Tech Stack">
-          <div class="tech-chips" (click)="$event.stopPropagation(); startEditing(job.id, 'techStack', '')">
-            @for (tech of job.techStack; track tech) {
-            <span class="tech-pill">
-              {{ tech }}
-
-            </span>
+          <div class="tech-chips" (click)="$event.stopPropagation(); openTechStackModal(job)">
+            @for (tech of job.techStack; track tech; let i = $index) {
+              @if (i < 2){
+                <span class="tech-pill">
+                  {{ tech }}
+                </span>
+              }
             }
-            @if (store['isEditing']()(job.id, 'techStack')) {
-            <input type="text" class="tech-stack-input" (keydown)="onTechStackKeyDown($event, job)"
-              (blur)="store['clearEditingCell']()" placeholder="Add tech..." autofocus />
-            } @else {
             @if (job.techStack.length === 0) {
             <span class="empty-tech-stack">Click to add tech stack</span>
-            }
             }
           </div>
         </td>
       </ng-container>
 
-      <!-- Status -->
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef class="sortable-header" (click)="onSort('status')">
           Status
           <mat-icon class="sort-icon">{{ getSortIcon('status') }}</mat-icon>
         </th>
-        <td mat-cell *matCellDef="let job" (click)="startEditing(job.id, 'status', job.status)" data-label="Status">
-          @if (store['isEditing']()(job.id, 'status')) {
-          <mat-select [value]="editingValue()"
-            (selectionChange)="updateStatus(job.id, $event.value); store['clearEditingCell']()"
-            class="status-select-inline" panelClass="status-dropdown-panel" open>
-            @for (status of statusOptions; track status) {
-            <mat-option [value]="status">
-              <span class="status-badge" [style.--badge-color]="getStatusColor(status)">
-                {{ status }}
-              </span>
-            </mat-option>
-            }
-          </mat-select>
-          } @else {
+        <td mat-cell *matCellDef="let job" data-label="Status">
           <span class="status-badge" [style.--badge-color]="getStatusColor(job.status)"
             [matTooltip]="'Status: ' + job.status">
             {{ job.status }}
           </span>
-          }
         </td>
       </ng-container>
 
-      <!-- Applied Date -->
       <ng-container matColumnDef="appliedDate">
         <th mat-header-cell *matHeaderCellDef class="sortable-header" (click)="onSort('appliedDate')">
           Applied
           <mat-icon class="sort-icon">{{ getSortIcon('appliedDate') }}</mat-icon>
         </th>
         <td mat-cell *matCellDef="let job" class="date-cell">
-          @if (editingField() === 'appliedDate' && editingId() === job.id) {
-            <div class="date-edit-container">
-              <input 
-                type="date" 
-                class="inline-input date-input"
-                [value]="formatDateForEdit(job.appliedDate)"
-                (blur)="saveField(job.id, 'appliedDate', $any($event.target).value)"
-                (keydown.enter)="saveField(job.id, 'appliedDate', $any($event.target).value); $any($event.target).blur()"
-                (keydown.escape)="cancelEdit()"
-                #dateInput
-                matTooltip="Press Enter to save, Escape to cancel"
-                matTooltipPosition="above"
-                autoFocus
-              >
-              <mat-icon class="calendar-icon">calendar_today</mat-icon>
-            </div>
-          } @else {
-            <span 
-              class="editable-field date-display"
-              (click)="startEditing(job.id, 'appliedDate', job.appliedDate)"
-              matTooltip="Click to edit date"
-            >
-              {{ formatDate(job.appliedDate) }}
-            </span>
-          }
+          <span class="date-display">
+            {{ formatDate(job.appliedDate) }}
+          </span>
         </td>
       </ng-container>
 
-      <!-- Reminder Date -->
       <ng-container matColumnDef="reminderDate">
         <th mat-header-cell *matHeaderCellDef class="sortable-header" (click)="onSort('reminderDate')">
           Reminder
           <mat-icon class="sort-icon">{{ getSortIcon('reminderDate') }}</mat-icon>
         </th>
         <td mat-cell *matCellDef="let job" class="date-cell">
-          @if (editingField() === 'reminderDate' && editingId() === job.id) {
-            <div class="date-edit-container">
-              <input 
-                type="date" 
-                class="inline-input date-input"
-                [value]="formatDateForEdit(job.reminderDate)"
-                (blur)="saveField(job.id, 'reminderDate', $any($event.target).value)"
-                (keydown.enter)="saveField(job.id, 'reminderDate', $any($event.target).value); $any($event.target).blur()"
-                (keydown.escape)="cancelEdit()"
-                #dateInput
-                matTooltip="Press Enter to save, Escape to cancel"
-                matTooltipPosition="above"
-                autoFocus
-              >
-              <mat-icon class="calendar-icon">calendar_today</mat-icon>
-            </div>
-          } @else {
-            <span 
-              class="editable-field date-display"
-              (click)="startEditing(job.id, 'reminderDate', job.reminderDate)"
-              matTooltip="Click to edit reminder date"
-            >
-              {{ formatDate(job.reminderDate) }}
-            </span>
-          }
+          <span class="date-display">
+            {{ formatDate(job.reminderDate) }}
+          </span>
         </td>
       </ng-container>
 
-      <!-- Contact / POC -->
       <ng-container matColumnDef="poc">
         <th mat-header-cell *matHeaderCellDef>Contact</th>
         <td mat-cell *matCellDef="let job" data-label="Contact">
-          <div class="poc-container">
-            @for (p of job.poc; track $index; let i = $index) {
-            @if (store['isEditing']()(job.id, 'poc', i)) {
-            <div class="poc-editor">
-              <input class="mini-input" [value]="p.name" (blur)="updatePOC(job.id, i, 'name', $event.target.value)"
-                placeholder="Name" />
-              <input class="mini-input" [value]="p.email" (blur)="updatePOC(job.id, i, 'email', $event.target.value)"
-                placeholder="Email" />
-              <input class="mini-input" [value]="p.mobile" (blur)="updatePOC(job.id, i, 'mobile', $event.target.value)"
-                placeholder="Mobile" />
-              <select class="mini-input" (change)="updatePOC(job.id, i, 'designation', $any($event.target).value)">
-                <option value="Recruiter" [selected]="p.designation === 'Recruiter'">Recruiter</option>
-                <option value="Hiring Manager" [selected]="p.designation === 'Hiring Manager'">Hiring Manager</option>
-                <option value="HR" [selected]="p.designation === 'HR'">HR</option>
-                <option value="Technical Lead" [selected]="p.designation === 'Technical Lead'">Technical Lead</option>
-                <option value="Director" [selected]="p.designation === 'Director'">Director</option>
-              </select>
-              <div class="poc-editor-actions">
-                <button mat-icon-button color="warn" class="mini-icon-btn" (click)="removePOC(job.id, i)"
-                  matTooltip="Delete Contact">
-                  <mat-icon>delete</mat-icon>
-                </button>
-                <button mat-icon-button color="primary" class="mini-icon-btn" (click)="store['clearEditingCell']()"
-                  matTooltip="Save Contact">
-                  <mat-icon>check</mat-icon>
-                </button>
-              </div>
+            <div class="poc-container">
+              @if (job.poc.length > 0) {
+                <!-- Show primary contact (first contact) -->
+                <div class="poc-item" (click)="$event.stopPropagation(); openMultiContactModal(job)">
+                  <div class="poc-info">
+                    <span class="poc-name" [matTooltip]="(job.poc[0].designation || 'Contact') + ': ' + (job.poc[0].mobile || 'No mobile')">{{
+                      job.poc[0].name }}</span>
+                    <span class="poc-designation">{{ job.poc[0].designation || 'Contact' }}</span>
+                  </div>
+                  <div class="poc-actions">
+                    @if (job.poc[0].email) {
+                    <a [href]="'mailto:' + job.poc[0].email" mat-icon-button class="mini-icon-btn" [matTooltip]="'Email ' + job.poc[0].name"
+                      (click)="$event.stopPropagation()"><mat-icon>email</mat-icon></a>
+                    }
+                    @if (job.poc[0].mobile) {
+                    <a [href]="'tel:' + job.poc[0].mobile" mat-icon-button class="mini-icon-btn" [matTooltip]="'Call ' + job.poc[0].name"
+                      (click)="$event.stopPropagation()"><mat-icon>call</mat-icon></a>
+                    }
+                  </div>
+                </div>
+                
+                <div class="poc-footer-actions">
+                  <!-- Show indicator for additional contacts -->
+                  @if (job.poc.length > 1) {
+                    <div class="additional-contacts-indicator" (click)="$event.stopPropagation(); openMultiContactModal(job)" matTooltip="View all contacts">
+                      <span class="plus-more">+{{ job.poc.length - 1 }} more</span>
+                      <mat-icon>expand_more</mat-icon>
+                    </div>
+                  }
+                  
+                  <button mat-icon-button class="add-poc-mini-btn" (click)="$event.stopPropagation(); addPOC(job.id)" matTooltip="Add additional contact">
+                    <mat-icon>person_add</mat-icon>
+                  </button>
+                </div>
+              } @else {
+                <div class="no-contacts" (click)="$event.stopPropagation(); addPOC(job.id)" matTooltip="Add contact">
+                  <span>No contacts</span>
+                  <mat-icon>add</mat-icon>
+                </div>
+              }
             </div>
-            } @else {
-            <div class="poc-item" (click)="$event.stopPropagation(); startEditing(job.id, 'poc', p.name)">
-              <div class="poc-info">
-                <span class="poc-name" [matTooltip]="(p.designation || 'Contact') + ': ' + (p.mobile || 'No mobile')">{{
-                  p.name }}</span>
-                <span class="poc-designation">{{ p.designation || 'Contact' }}</span>
-              </div>
-              <div class="poc-actions">
-                @if (p.email) {
-                <a [href]="'mailto:' + p.email" mat-icon-button class="mini-icon-btn" [matTooltip]="'Email ' + p.name"
-                  (click)="$event.stopPropagation()"><mat-icon>email</mat-icon></a>
-                }
-                @if (p.mobile) {
-                <a [href]="'tel:' + p.mobile" mat-icon-button class="mini-icon-btn" [matTooltip]="'Call ' + p.name"
-                  (click)="$event.stopPropagation()"><mat-icon>call</mat-icon></a>
-                }
-              </div>
-            </div>
-            }
-            }
-            <button mat-button class="add-poc-btn" (click)="addPOC(job.id)">
-              <mat-icon>person_add</mat-icon> Add Contact
-            </button>
-          </div>
         </td>
       </ng-container>
 
-      <!-- Documents -->
       <ng-container matColumnDef="documents">
         <th mat-header-cell *matHeaderCellDef>Documents</th>
         <td mat-cell *matCellDef="let job" data-label="Documents">
-          @if (store['isEditing']()(job.id, 'documents')) {
-          <div class="inline-editor-overlay">
-            <input type="text" class="inline-input"
-              [value]="job.linkedInUrl + (job.resumeUrl ? ',' + job.resumeUrl : '') + (job.coverLetterUrl ? ',' + job.coverLetterUrl : '')"
-              (input)="editingValue.set($event.target.value)" (keydown)="onLinksKeyDown($event, job)"
-              placeholder="LinkedIn, Resume, Cover Letter (comma separated)" autofocus />
-            <div class="inline-actions">
-              <button mat-icon-button color="primary" (click)="processLinks(job.id)"><mat-icon>check</mat-icon></button>
-              <button mat-icon-button color="warn" (click)="cancelEditing()"><mat-icon>close</mat-icon></button>
-            </div>
-          </div>
-          } @else {
-          <div class="link-icons" (click)="$event.stopPropagation(); startEditing(job.id, 'documents', '')">
+          <div class="link-icons" (click)="$event.stopPropagation(); openDocumentsModal(job)">
             @if (job.linkedInUrl) {
             <a [href]="job.linkedInUrl" target="_blank" rel="noopener" mat-icon-button matTooltip="LinkedIn Profile">
               <mat-icon>person</mat-icon>
@@ -322,18 +189,13 @@
             <span class="no-links" matTooltip="Click to add docs">—</span>
             }
           </div>
-          }
         </td>
       </ng-container>
 
-      <!-- Actions -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let job" data-label="Actions">
           <div class="action-buttons">
-            <button mat-icon-button matTooltip="Duplicate" class="duplicate-btn" (click)="duplicateJob(job)">
-              <mat-icon>content_copy</mat-icon>
-            </button>
             <button mat-icon-button matTooltip="Delete" class="delete-btn" (click)="confirmDelete(job)">
               <mat-icon>delete</mat-icon>
             </button>

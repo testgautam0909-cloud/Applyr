@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { PointOfContact } from '../../types/job-application.type';
+import { JobApplicationService } from '../../api/job-application.service';
+import { Subject, debounceTime, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-add-contact-modal',
@@ -25,7 +27,7 @@ import { PointOfContact } from '../../types/job-application.type';
   template: `
     <div class="modal-container">
       <div class="modal-header">
-        <h2>Add New Contact</h2>
+        <h2>{{ isEditMode ? 'Edit Contact' : 'Add New Contact' }}</h2>
         <button mat-icon-button (click)="closeModal()">
           <mat-icon>close</mat-icon>
         </button>
@@ -36,6 +38,7 @@ import { PointOfContact } from '../../types/job-application.type';
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>Name *</mat-label>
             <input matInput [(ngModel)]="contactData.name" name="name" required 
+                   (ngModelChange)="onFieldChange()"
                    placeholder="Enter contact name" #nameInput="ngModel">
             <mat-error *ngIf="nameInput.invalid && nameInput.touched">
               Name is required
@@ -45,6 +48,7 @@ import { PointOfContact } from '../../types/job-application.type';
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>Email *</mat-label>
             <input matInput [(ngModel)]="contactData.email" name="email" type="email" required
+                   (ngModelChange)="onFieldChange()"
                    placeholder="Enter email address" #emailInput="ngModel"
                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
             <mat-error *ngIf="emailInput.invalid && emailInput.touched">
@@ -55,12 +59,14 @@ import { PointOfContact } from '../../types/job-application.type';
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>Mobile Number</mat-label>
             <input matInput [(ngModel)]="contactData.mobile" name="mobile"
+                   (ngModelChange)="onFieldChange()"
                    placeholder="Enter mobile number" #mobileInput="ngModel">
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>Designation *</mat-label>
             <mat-select [(ngModel)]="contactData.designation" name="designation" required
+                        (selectionChange)="onFieldChange()"
                         #designationInput="ngModel">
               <mat-option value="Recruiter">Recruiter</mat-option>
               <mat-option value="Hiring Manager">Hiring Manager</mat-option>
@@ -76,14 +82,20 @@ import { PointOfContact } from '../../types/job-application.type';
           </mat-form-field>
 
           <div class="modal-actions">
-            <button mat-button type="button" (click)="closeModal()" class="cancel-btn">
-              Cancel
-            </button>
-            <button mat-flat-button color="primary" type="submit" 
-                    [disabled]="!contactData.name || !contactData.email || !contactData.designation"
-                    class="save-btn">
-              Save Contact
-            </button>
+            @if (isEditMode) {
+                <button mat-flat-button color="primary" type="button" (click)="closeModal()" class="save-btn">
+                    Done
+                </button>
+            } @else {
+                <button mat-button type="button" (click)="closeModal()" class="cancel-btn">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" type="submit" 
+                        [disabled]="contactForm.invalid"
+                        class="save-btn">
+                    Add
+                </button>
+            }
           </div>
         </form>
       </div>
@@ -143,9 +155,15 @@ import { PointOfContact } from '../../types/job-application.type';
     }
   `]
 })
-export class AddContactModalComponent {
+export class AddContactModalComponent implements OnDestroy {
   private readonly dialogRef = inject(MatDialogRef<AddContactModalComponent>);
-  
+  private readonly service = inject(JobApplicationService);
+
+  private readonly destroy$ = new Subject<void>();
+  private readonly update$ = new Subject<void>();
+
+  protected jobId = '';
+  protected pocIndex: number | null = null;
   protected contactData = {
     name: '',
     email: '',
@@ -153,19 +171,71 @@ export class AddContactModalComponent {
     designation: ''
   };
 
+  protected isEditMode = false;
+
+  constructor() {
+    const data = this.dialogRef['_containerInstance']['_config'].data;
+    if (data) {
+      this.jobId = data.jobId;
+      if (data.contact) {
+        this.contactData = { ...data.contact };
+        this.isEditMode = true;
+        this.pocIndex = data.pocIndex;
+      }
+    }
+
+    this.update$.pipe(
+      debounceTime(1000),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.persistChanges();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   protected closeModal(): void {
+    if (this.isEditMode) {
+      this.persistChanges();
+    }
     this.dialogRef.close();
+  }
+
+  protected onFieldChange(): void {
+    if (this.isEditMode) {
+      this.update$.next();
+    }
   }
 
   protected saveContact(): void {
     if (this.contactData.name && this.contactData.email && this.contactData.designation) {
-      const newContact: PointOfContact = {
+      this.persistChanges();
+      this.dialogRef.close();
+    }
+  }
+
+  private persistChanges(): void {
+    if (this.jobId && this.contactData.name && this.contactData.email && this.contactData.designation) {
+      const contact: PointOfContact = {
         name: this.contactData.name.trim(),
         email: this.contactData.email.trim(),
         mobile: this.contactData.mobile.trim(),
         designation: this.contactData.designation
       };
-      this.dialogRef.close(newContact);
+
+      const job = this.service.jobs().find(j => j.id === this.jobId);
+      if (job) {
+        const updatedPOCs = [...job.poc];
+        if (this.isEditMode && this.pocIndex !== null) {
+          updatedPOCs[this.pocIndex] = contact;
+        } else {
+          updatedPOCs.push(contact);
+        }
+        this.service.updateJobField(this.jobId, 'poc', updatedPOCs);
+      }
     }
   }
 }
