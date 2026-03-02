@@ -15,8 +15,7 @@ export class ThemeService {
         effect(() => {
             if (this.isBrowser) {
                 const currentTheme = this._theme();
-                document.documentElement.classList.remove('light-mode', 'dark-mode');
-                document.documentElement.classList.add(`${currentTheme}-mode`);
+                document.documentElement.setAttribute('data-bs-theme', currentTheme);
                 localStorage.setItem('theme', currentTheme);
             }
         });

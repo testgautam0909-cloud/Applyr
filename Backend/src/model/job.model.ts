@@ -1,26 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import type { IJob } from '../interface/job.interface.js';
 
-export interface IPOC {
-    name: string;
-    email: string;
-    mobile: string;
-    designation: string;
-}
-
-export interface IJob extends Document {
-    jobTitle: string;
-    company: string;
-    location: string;
-    techStack: string[];
-    experience: string;
-    status: string;
-    appliedDate: string;
-    reminderDate: string;
-    linkedInUrl: string;
-    resumeUrl: string;
-    coverLetterUrl: string;
-    poc: IPOC[];
-}
 
 const JobSchema: Schema = new Schema({
     jobTitle: { type: String, required: true },
@@ -29,11 +9,13 @@ const JobSchema: Schema = new Schema({
     techStack: [{ type: String }],
     experience: { type: String },
     status: { type: String, required: true },
-    appliedDate: { type: String, required: true },
+    appliedDate: { type: String },
     reminderDate: { type: String },
     linkedInUrl: { type: String },
     resumeUrl: { type: String },
     coverLetterUrl: { type: String },
+    sourcePlatform: { type: String },
+    jobDescription: { type: String },
     poc: [{
         name: { type: String },
         email: { type: String },

@@ -1,0 +1,70 @@
+<div class="container-fluid py-5 px-md-5">
+
+    <!-- Filters Area -->
+    <div class="glass-card mb-5 p-4 fade-in" style="animation-delay: 0.1s;">
+        <div class="row g-4 align-items-center">
+            <!-- Search -->
+            <div class="col-lg-4">
+                <div class="premium-search-group">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="form-control premium-search shadow-none" placeholder="Search anything..."
+                        [value]="store.searchTerm()" (input)="onSearch($event)">
+                </div>
+            </div>
+
+            <!-- Status Filters -->
+            <div class="col-lg-8">
+                <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                    <button *ngFor="let status of statusOptions" class="btn filter-pill shadow-none"
+                        [class.active]="store.statusFilter().includes(status)" (click)="toggleStatusFilter(status)">
+                        {{ status }}
+                        <span class="count">{{ store.statusCounts()[status] || 0 }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="fade-in" style="animation-delay: 0.2s;">
+        <app-job-table [jobs]="store.pagedJobs()" [sortColumn]="store.sortColumn()"
+            [sortDirection]="store.sortDirection()" (sort)="store.setSort($event)" (updateField)="onUpdateField($event)"
+            (delete)="service.deleteJob($event)" (openContacts)="openContacts($event)" (addContact)="addContact($event)"
+            (openTechStack)="openTechStack($event)">
+        </app-job-table>
+
+        <!-- Pagination Bar -->
+        <div
+            class="mt-4 glass-card p-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div class="pagination-info">
+                Showing <span class="fw-bold">{{ store.pagedJobs().length }}</span> of <span class="fw-bold">{{
+                    store.totalCount() }}</span> roles
+                <select class="ms-3 select-premium shadow-none" [value]="store.pageSize()"
+                    (change)="onPageSizeChange($event)">
+                    <option [value]="5">5 per page</option>
+                    <option [value]="10">10 per page</option>
+                    <option [value]="25">25 per page</option>
+                </select>
+            </div>
+
+            <nav>
+                <ul class="pagination pagination-premium mb-0 shadow-none">
+                    <li class="page-item" [class.disabled]="store.currentPage() === 0">
+                        <button class="page-link shadow-none" (click)="onPageChange(store.currentPage() - 1)">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link">{{ store.currentPage() + 1 }}</span>
+                    </li>
+                    <li class="page-item"
+                        [class.disabled]="(store.currentPage() + 1) * store.pageSize() >= store.totalCount()">
+                        <button class="page-link shadow-none" (click)="onPageChange(store.currentPage() + 1)">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

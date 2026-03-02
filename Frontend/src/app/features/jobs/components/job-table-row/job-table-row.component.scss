@@ -1,0 +1,113 @@
+@use '../../../../../styles/abstracts/variables' as v;
+
+:host {
+    display: table-row;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+
+    &:hover {
+        background: rgba(124, 58, 237, 0.05) !important;
+
+        .btn-delete-row {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}
+
+.more-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6B7280;
+    background: #F3F4F6;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.poc-card {
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+    cursor: pointer;
+    min-width: 160px;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
+    .avatar-sm {
+        width: 28px;
+        height: 28px;
+        background: #7C3AED;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);
+    }
+
+    .poc-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .poc-title {
+        font-size: 11px;
+        color: #6B7280;
+    }
+}
+
+.btn-add-contact {
+    padding: 4px 8px;
+    color: #9CA3AF;
+    font-size: 1rem;
+
+    &:hover {
+        color: #7C3AED;
+        background: #EDE9FE;
+    }
+}
+
+.overdue-pulse {
+    width: 6px;
+    height: 6px;
+    background: #EF4444;
+    border-radius: 50%;
+    box-shadow: 0 0 0 rgba(239, 68, 68, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.btn-delete-row {
+    color: #9CA3AF;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+
+    &:hover {
+        color: #DC2626;
+        background: #FEE2E2;
+    }
+}

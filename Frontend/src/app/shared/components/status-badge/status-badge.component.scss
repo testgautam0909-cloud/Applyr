@@ -1,0 +1,107 @@
+@use '../../../../styles/abstracts/variables' as v;
+
+.badge-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    &.status-discovery {
+        background: #EEF2FF;
+        color: #4F46E5;
+    }
+
+    &.status-not-applied {
+        background: #F1F5F9;
+        color: #475569;
+    }
+
+    &.status-applied {
+        background: #E0E7FF;
+        color: #4338CA;
+    }
+
+    &.status-phone-screen {
+        background: #E0F2FE;
+        color: #0369A1;
+    }
+
+    &.status-interviewing {
+        background: #FEF9C3;
+        color: #A16207;
+    }
+
+    &.status-technical-test {
+        background: #F5F3FF;
+        color: #6D28D9;
+    }
+
+    &.status-final-round {
+        background: #FDF4FF;
+        color: #A21CAF;
+    }
+
+    &.status-offer-received {
+        background: #DCFCE7;
+        color: #15803D;
+    }
+
+    &.status-rejected {
+        background: #FEE2E2;
+        color: #B91C1C;
+    }
+
+    &.status-withdrawn {
+        background: #F3F4F6;
+        color: #4B5563;
+    }
+
+    &:hover:not([disabled]) {
+        transform: translateY(-1px);
+        filter: brightness(0.95);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.dot-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.glass-menu {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: var(--glass-shadow) !important;
+}
+
+.dropdown-item {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: var(--bg-app);
+        color: var(--text-main);
+    }
+
+    &.active-item {
+        background: var(--primary-glow);
+        color: var(--primary-vibrant);
+        font-weight: 700;
+    }
+}

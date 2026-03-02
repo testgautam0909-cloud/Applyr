@@ -1,0 +1,39 @@
+@use '../abstracts/variables' as v;
+@use '../abstracts/mixins' as m;
+
+.table-container {
+    @include m.card;
+    overflow: hidden;
+    margin-top: v.$space-4;
+}
+
+.base-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        background-color: v.$color-background;
+        border-bottom: 2px solid v.$color-border;
+    }
+
+    th {
+        padding: v.$space-3 v.$space-4;
+        text-align: left;
+        font-size: v.$font-size-sm;
+        font-weight: v.$font-weight-semibold;
+        color: v.$color-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    td {
+        padding: v.$space-3 v.$space-4;
+        border-bottom: 1px solid v.$color-border;
+        font-size: v.$font-size-base;
+        color: v.$color-text-secondary;
+    }
+
+    tr {
+        @include m.hover-row-highlight;
+    }
+}

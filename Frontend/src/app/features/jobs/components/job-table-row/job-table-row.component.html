@@ -1,0 +1,88 @@
+<td class="fw-bold text-primary">
+    <app-inline-edit [value]="job.jobTitle" (save)="onFieldChange('jobTitle', $event)" placeholder="Job Title"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <app-inline-edit [value]="job.company" (save)="onFieldChange('company', $event)" placeholder="Company Name"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <app-inline-edit [value]="job.location" (save)="onFieldChange('location', $event)" placeholder="Location"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <div class="d-flex flex-wrap gap-2" (click)="openTechStack.emit(job)" style="cursor: pointer; max-width: 220px;">
+        @for (tech of job.techStack.slice(0, 3); track tech) {
+        <app-tag-chip [label]="tech"></app-tag-chip>
+        }
+        @if (job.techStack.length > 3) {
+        <span class="more-count align-self-center">+{{ job.techStack.length - 3 }}</span>
+        }
+    </div>
+</td>
+
+<td>
+    <app-status-badge [status]="job.status" [editable]="true" (statusChange)="onFieldChange('status', $event)">
+    </app-status-badge>
+</td>
+
+<td>
+    <div class="poc-card" (click)="openContacts.emit(job)">
+        @if (job.poc.length > 0) {
+        <div class="d-flex align-items-center gap-2">
+            <div class="avatar-sm">
+                {{ job.poc[0].name.charAt(0) }}
+            </div>
+            <div class="poc-details">
+                <div class="poc-name">{{ job.poc[0].name }}</div>
+                <div class="poc-title">{{ job.poc[0].designation || 'Primary Contact' }}</div>
+            </div>
+        </div>
+        } @else {
+        <button class="btn btn-add-contact" (click)="$event.stopPropagation(); addContact.emit(job.id)">
+            <i class="bi bi-person-plus"></i>
+        </button>
+        }
+    </div>
+</td>
+
+<td class="text-nowrap text-secondary font-monospace" style="font-size: 0.8rem;">
+    <app-inline-edit [value]="job.appliedDate" type="date" (save)="onFieldChange('appliedDate', $event)"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <div class="d-flex align-items-center gap-2">
+        <app-inline-edit [value]="job.reminderDate" type="date" placeholder="Remind me"
+            (save)="onFieldChange('reminderDate', $event)" [showIcon]="true">
+        </app-inline-edit>
+        @if (isOverdue(job.reminderDate)) {
+        <span class="overdue-pulse" title="Deadline passed"></span>
+        }
+    </div>
+</td>
+
+<td>
+    <app-inline-edit [value]="job.sourcePlatform" (save)="onFieldChange('sourcePlatform', $event)"
+        placeholder="Source Platform" [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <app-inline-edit [value]="job.jobDescription" (save)="onFieldChange('jobDescription', $event)"
+        placeholder="Job Description" [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td class="text-end">
+    <button class="btn btn-delete-row" (click)="delete.emit(job.id)" title="Remove Application">
+        <i class="bi bi-trash3"></i>
+    </button>
+</td>

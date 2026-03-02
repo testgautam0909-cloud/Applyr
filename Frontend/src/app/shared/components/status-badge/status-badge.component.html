@@ -1,0 +1,16 @@
+<div class="glass-dropdown">
+    <button class="btn btn-sm badge-pill dropdown-toggle border-0" [ngClass]="getStatusClass(status)" type="button"
+        [attr.data-bs-toggle]="editable ? 'dropdown' : null" [disabled]="!editable">
+        <span class="dot-indicator"></span>
+        {{ status }}
+    </button>
+    <ul class="dropdown-menu shadow-lg border-0 glass-menu p-2" style="min-width: 180px; z-index: 1050;">
+        <li *ngFor="let s of statusOptions" class="mb-1">
+            <button class="dropdown-item d-flex align-items-center rounded-3 py-2 px-3"
+                [class.active-item]="s === status" (click)="onChange(s)" type="button">
+                <span class="dot-indicator me-3" [ngClass]="getStatusClass(s)"></span>
+                <span class="status-name">{{ s }}</span>
+            </button>
+        </li>
+    </ul>
+</div>

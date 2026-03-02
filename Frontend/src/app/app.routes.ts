@@ -8,7 +8,7 @@ export const routes: Routes = [
   },
   {
     path: 'jobs',
-    loadComponent: () => import('./components/job-table/job-table').then(m => m.JobTable)
+    loadComponent: () => import('./features/jobs/containers/jobs-page/jobs-page.component').then(m => m.JobsPageComponent)
   },
   {
     path: '**',
