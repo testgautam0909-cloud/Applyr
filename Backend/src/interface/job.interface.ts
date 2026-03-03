@@ -16,13 +16,13 @@ export interface AIJobData {
     status: JobStatus;
     appliedDate: string;        // YYYY-MM-DD
     reminderDate: string;        // YYYY-MM-DD
-    linkedInUrl: string;
     resumeUrl: string;
     coverLetterUrl: string;
     poc: PointOfContact[];
-    sourcePlatform?: string;     // optional, added by our service
+    sourcePlatform: string;     // optional, added by our service
     jobDescription: string;
     _extractionError?: string;   // for error reporting
+    postURL: string;
 }
 
 export interface IPOC {
@@ -41,12 +41,12 @@ export interface IJob extends Document {
     status: string;
     appliedDate: string;
     reminderDate: string;
-    linkedInUrl: string;
     resumeUrl: string;
     coverLetterUrl: string;
     jobDescription: string;
     sourcePlatform: string;
     poc: IPOC[];
+    postURL: string;
 }
 
 export type JobStatus = 'DISCOVERY' | 'NOT_APPLIED' | 'APPLIED' | 'PHONE_SCREEN' | 'INTERVIEWING' | 'TECHNICAL_TEST' | 'FINAL_ROUND' | 'OFFER_RECEIVED' | 'REJECTED' | 'WITHDRAWN';

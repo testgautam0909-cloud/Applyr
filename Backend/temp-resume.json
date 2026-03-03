@@ -1,0 +1,189 @@
+{
+  "_id": "69a6a4722d6f308da5bbfd2c",
+  "basics": {
+    "name": "Gautam Patel",
+    "label": "Full Stack Developer",
+    "email": "patelgautam0942@gmail.com",
+    "phone": "",
+    "summary": "Full Stack Developer with 5+ years of experience...",
+    "location": {
+      "address": "",
+      "postalCode": "",
+      "city": "",
+      "countryCode": "",
+      "region": ""
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "patel-gautam",
+        "url": "https://linkedin.com/in/patel-gautam/"
+      },
+      {
+        "network": "GitHub",
+        "username": "gautam0904",
+        "url": "https://github.com/gautam0904"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Vedix Infotech",
+      "position": "Senior Software Developer (Full Stack)",
+      "startDate": "2020-03-01",
+      "endDate": "present",
+      "summary": "Full Stack Developer responsible for designing, developing, and maintaining enterprise web applications across frontend and backend systems.",
+      "highlights": [
+        "Developed and maintained scalable applications using Angular, Node.js, TypeScript, REST APIs, MongoDB, and SQL.",
+        "Designed responsive UI components that improved usability and reduced user-facing errors.",
+        "Implemented backend authentication, authorization, and business logic for multiple enterprise modules.",
+        "Optimized APIs and database queries, significantly improving application response time.",
+        "Collaborated closely with UI/UX designers, product managers, QA, and backend teams.",
+        "Integrated third-party services, payment gateways, and automation tools.",
+        "Conducted code reviews, improved coding standards, and mentored junior developers.",
+        "Supported CI/CD pipelines and deployment workflows.",
+        "Reduced application load time by 20-35% through lazy loading, refactoring, and API optimization.",
+        "Decreased production bugs by ~30% through better testing, debugging, and code quality practices.",
+        "Delivered major product features ahead of schedule, improving client satisfaction.",
+        "Actively contributed within teams of 5-10 developers across multiple projects."
+      ],
+      "keywords": [],
+      "roles": []
+    },
+    {
+      "name": "Vedix Infotech",
+      "position": "Software Developer (Full Stack)",
+      "startDate": "2018-03-01",
+      "endDate": "2020-02-29",
+      "summary": "Assisted in developing full-stack modules using Angular and Node.js. Built reusable UI components and ensured responsive layouts. Implemented REST APIs and supported backend data processing. Worked with SQL/MongoDB for CRUD operations. Participated in Agile ceremonies, debugging, testing, and documentation. Improved page responsiveness and navigation flow.",
+      "highlights": [],
+      "keywords": [],
+      "roles": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "",
+      "area": "Computer Science",
+      "studyType": "Bachelor of Technology",
+      "startDate": "",
+      "endDate": "",
+      "gpa": "9.13",
+      "courses": []
+    }
+  ],
+  "skills": [
+    {
+      "name": "Frontend Development",
+      "keywords": [
+        "Angular",
+        "React",
+        "Next.js",
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "TypeScript",
+        "Bootstrap",
+        "Tailwind CSS"
+      ]
+    },
+    {
+      "name": "Backend Development",
+      "keywords": [
+        "Node.js",
+        "Express.js",
+        "Inversify.js",
+        "Nest.js",
+        "JWT",
+        "REST APIs",
+        "Stripe"
+      ]
+    },
+    {
+      "name": "Databases",
+      "keywords": [
+        "MongoDB",
+        "MySQL",
+        "SQL Server"
+      ]
+    },
+    {
+      "name": "DevOps & Tools",
+      "keywords": [
+        "Git",
+        "GitHub",
+        "GitLab",
+        "VS Code",
+        "Postman",
+        "Docker",
+        "Vercel",
+        "Netlify",
+        "Railway",
+        "Render"
+      ]
+    },
+    {
+      "name": "Other",
+      "keywords": [
+        "GraphQL",
+        "AWS",
+        "OpenAI Integration",
+        "OCR",
+        "Agile Collaboration",
+        "Testing (Jest)"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "AI Interview & Hiring Evaluation Platform (Workscreen)",
+      "description": "Led end-to-end development of an AI-powered interview system using the MEAN stack...",
+      "highlights": [],
+      "keywords": [],
+      "startDate": "2022-04-01",
+      "roles": []
+    },
+    {
+      "name": "Wholesale Billing & Stock Automation System (Timmerman Industries)",
+      "description": "Developed an end-to-end billing, invoicing, and inventory automation platform...",
+      "highlights": [],
+      "keywords": [],
+      "startDate": "2020-07-01",
+      "roles": []
+    }
+  ],
+  "awards": [
+    {
+      "title": "Employee of the Quarter",
+      "summary": "Recognized for delivering critical product features ahead of schedule and improving system performance."
+    },
+    {
+      "title": "Best Performer Award",
+      "summary": "Awarded for consistent contribution across frontend and backend development and high-quality code delivery."
+    },
+    {
+      "title": "Project Excellence Recognition",
+      "summary": "Acknowledged for successful delivery of complex full-stack modules and cross-team collaboration."
+    }
+  ],
+  "certificates": [
+    {
+      "name": "Google Cloud Digital Leader",
+      "issuer": "Google"
+    },
+    {
+      "name": "HackerRank Certifications - JavaScript, React, Backend Development",
+      "issuer": "HackerRank"
+    },
+    {
+      "name": "OpenAI API Developer (Udemy)",
+      "issuer": "Udemy"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0"
+  },
+  "createdAt": "2026-03-03T09:05:54.742Z",
+  "updatedAt": "2026-03-03T09:05:54.742Z",
+  "__v": 0
+}

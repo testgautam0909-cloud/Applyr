@@ -22,10 +22,11 @@ export class JobTableRowComponent {
     @Input({ required: true }) job!: JobApplication;
 
     @Output() updateField = new EventEmitter<{ id: string, field: string, value: any }>();
-    @Output() delete = new EventEmitter<string>();
+    @Output() delete = new EventEmitter<JobApplication>();
     @Output() openContacts = new EventEmitter<JobApplication>();
     @Output() addContact = new EventEmitter<string>();
     @Output() openTechStack = new EventEmitter<JobApplication>();
+    @Output() openJD = new EventEmitter<JobApplication>();
 
     protected onFieldChange(field: string, value: any): void {
         this.updateField.emit({ id: this.job.id, field, value });

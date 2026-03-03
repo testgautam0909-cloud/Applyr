@@ -8,6 +8,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddContactModalComponent } from '../../../contacts/components/add-contact-modal/add-contact-modal.component';
 import { MultiContactModalComponent } from '../../../contacts/components/multi-contact-modal/multi-contact-modal.component';
 import { TechStackModalComponent } from '../../../tech-stack/components/tech-stack-modal/tech-stack-modal.component';
+import { JobDescriptionModalComponent } from '../../components/job-description-modal/job-description-modal.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
     selector: 'app-jobs-page',
@@ -15,7 +17,8 @@ import { TechStackModalComponent } from '../../../tech-stack/components/tech-sta
     imports: [
         CommonModule,
         JobTableComponent,
-        MatDialogModule
+        MatDialogModule,
+        ConfirmDialogComponent
     ],
     templateUrl: './jobs-page.component.html',
     styleUrl: './jobs-page.component.scss',
@@ -73,5 +76,32 @@ export class JobsPageComponent {
 
     protected onUpdateField(event: { id: string, field: string, value: any }): void {
         this.service.updateJobField(event.id, event.field as keyof JobApplication, event.value);
+    }
+
+    protected openJobDescription(job: JobApplication): void {
+        this.dialog.open(JobDescriptionModalComponent, {
+            data: { job },
+            width: '760px',
+            maxHeight: '90vh',
+            panelClass: 'jd-dialog-panel'
+        });
+    }
+
+    protected onDeleteJob(job: JobApplication): void {
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            width: '400px',
+            data: {
+                title: 'Delete Application',
+                message: `Are you sure you want to delete the application for "${job.jobTitle}" at ${job.company}? This action cannot be undone.`,
+                confirmText: 'Delete',
+                isDestructive: true
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.service.deleteJob(job.id);
+            }
+        });
     }
 }

@@ -11,11 +11,11 @@ const JobSchema: Schema = new Schema({
     status: { type: String, required: true },
     appliedDate: { type: String },
     reminderDate: { type: String },
-    linkedInUrl: { type: String },
     resumeUrl: { type: String },
     coverLetterUrl: { type: String },
     sourcePlatform: { type: String },
     jobDescription: { type: String },
+    postURL: { type: String },
     poc: [{
         name: { type: String },
         email: { type: String },

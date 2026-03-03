@@ -1,5 +1,5 @@
 import Job from '../model/job.model.js';
-import type { IJob } from '../model/job.model.js';
+import type { IJob } from '../interface/job.interface.js';
 import type { AIJobData } from '../interface/job.interface.js';
 
 export class JobService {
@@ -39,10 +39,12 @@ export class JobService {
                 status: aiJobData.status,
                 appliedDate: aiJobData.appliedDate,
                 reminderDate: aiJobData.reminderDate,
-                linkedInUrl: aiJobData.linkedInUrl,
+                postURL: aiJobData.postURL,
                 resumeUrl: aiJobData.resumeUrl,
                 coverLetterUrl: aiJobData.coverLetterUrl,
                 poc: aiJobData.poc,
+                jobDescription: aiJobData.jobDescription,
+                sourcePlatform: aiJobData.sourcePlatform,
             };
 
             const job = new Job(jobData);

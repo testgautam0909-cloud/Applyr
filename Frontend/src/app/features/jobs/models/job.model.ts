@@ -28,7 +28,7 @@ export interface JobApplication {
     status: JobStatus;
     appliedDate: string; // stored as YYYY-MM-DD
     reminderDate: string; // stored as YYYY-MM-DD or ''
-    linkedInUrl: string;
+    postURL: string;
     resumeUrl: string;
     coverLetterUrl: string;
     poc: PointOfContact[];
@@ -46,7 +46,7 @@ export interface UpdateJobPayload {
     status: JobStatus;
     appliedDate: string;
     reminderDate: string;
-    linkedInUrl: string;
+    postURL: string;
     resumeUrl: string;
     coverLetterUrl: string;
     poc: PointOfContact[];

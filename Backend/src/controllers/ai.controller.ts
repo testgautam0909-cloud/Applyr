@@ -1,9 +1,11 @@
 import type { Request, Response } from 'express';
 import { JobExtractionService } from '../services/ai.service.js';
 import { JobService } from '../services/job.service.js';
+import { ResumeService } from '../services/resume.service.js';
 
 const jobExtractionService = new JobExtractionService();
 const jobService = new JobService();
+const resumeService = new ResumeService();
 
 export async function extractFromHtml(req: Request, res: Response): Promise<void> {
     try {
@@ -13,8 +15,8 @@ export async function extractFromHtml(req: Request, res: Response): Promise<void
             return;
         }
 
-        const jobData = await jobExtractionService.extractJobData(html, url || '');
-        
+        const jobData = await jobExtractionService.extractJobData(html, url || '', true, true);
+
         if (saveToDatabase) {
             try {
                 const savedJob = await jobService.createJobFromAI(jobData);
@@ -25,7 +27,7 @@ export async function extractFromHtml(req: Request, res: Response): Promise<void
                 return;
             } catch (saveError) {
                 console.error('Failed to save job to database:', saveError);
-                res.status(500).json({ 
+                res.status(500).json({
                     error: 'Job extracted but failed to save to database',
                     extractedData: jobData,
                     saveError: (saveError as Error).message
@@ -33,7 +35,7 @@ export async function extractFromHtml(req: Request, res: Response): Promise<void
                 return;
             }
         }
-        
+
         res.json(jobData);
     } catch (error) {
         console.error('Controller error:', error);
@@ -60,8 +62,8 @@ export async function extractFromUrl(req: Request, res: Response): Promise<void>
         }
         const html = await response.text();
 
-        const jobData = await jobExtractionService.extractJobData(html, url);
-        
+        const jobData = await jobExtractionService.extractJobData(html, url, true, true);
+
         if (saveToDatabase) {
             try {
                 const savedJob = await jobService.createJobFromAI(jobData);
@@ -72,7 +74,7 @@ export async function extractFromUrl(req: Request, res: Response): Promise<void>
                 return;
             } catch (saveError) {
                 console.error('Failed to save job to database:', saveError);
-                res.status(500).json({ 
+                res.status(500).json({
                     error: 'Job extracted but failed to save to database',
                     extractedData: jobData,
                     saveError: (saveError as Error).message
@@ -80,8 +82,24 @@ export async function extractFromUrl(req: Request, res: Response): Promise<void>
                 return;
             }
         }
-        
+
         res.json(jobData);
+    } catch (error) {
+        console.error('Controller error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export async function buildResumeData(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.body;
+        if (!id || typeof id !== 'string') {
+            res.status(400).json({ error: 'Missing ID' });
+            return;
+        }
+
+        const resumeData = await resumeService.buildResumeData(id);
+        res.json(resumeData);
     } catch (error) {
         console.error('Controller error:', error);
         res.status(500).json({ error: 'Internal server error' });

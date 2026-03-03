@@ -9,7 +9,8 @@
                 @for (job of jobs; track job.id) {
                 <tr app-job-table-row [job]="job" (updateField)="updateField.emit($event)"
                     (delete)="delete.emit($event)" (openContacts)="onOpenContacts($event)"
-                    (addContact)="onAddContact($event)" (openTechStack)="onOpenTechStack($event)">
+                    (addContact)="onAddContact($event)" (openTechStack)="onOpenTechStack($event)"
+                    (openJD)="openJD.emit($event)">
                 </tr>
                 } @empty {
                 <tr>

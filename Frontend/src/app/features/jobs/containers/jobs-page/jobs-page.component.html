@@ -29,8 +29,8 @@
     <div class="fade-in" style="animation-delay: 0.2s;">
         <app-job-table [jobs]="store.pagedJobs()" [sortColumn]="store.sortColumn()"
             [sortDirection]="store.sortDirection()" (sort)="store.setSort($event)" (updateField)="onUpdateField($event)"
-            (delete)="service.deleteJob($event)" (openContacts)="openContacts($event)" (addContact)="addContact($event)"
-            (openTechStack)="openTechStack($event)">
+            (delete)="onDeleteJob($event)" (openContacts)="openContacts($event)" (addContact)="addContact($event)"
+            (openTechStack)="openTechStack($event)" (openJD)="openJobDescription($event)">
         </app-job-table>
 
         <!-- Pagination Bar -->
