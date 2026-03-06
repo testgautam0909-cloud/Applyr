@@ -1,0 +1,129 @@
+<td class="fw-bold text-primary">
+    <app-inline-edit [value]="job.jobTitle" (save)="onFieldChange('jobTitle', $event)" placeholder="Job Title"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <app-inline-edit [value]="job.company" (save)="onFieldChange('company', $event)" placeholder="Company Name"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <app-inline-edit [value]="job.location" (save)="onFieldChange('location', $event)" placeholder="Location"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <div class="d-flex flex-wrap gap-2" (click)="openTechStack.emit(job)" style="cursor: pointer; max-width: 220px;">
+        @for (tech of job.techStack.slice(0, 3); track tech) {
+        <app-tag-chip [label]="tech"></app-tag-chip>
+        }
+        @if (job.techStack.length > 3) {
+        <span class="more-count align-self-center">+{{ job.techStack.length - 3 }}</span>
+        }
+    </div>
+</td>
+
+<td>
+    <app-status-badge [status]="job.status" [editable]="true" (statusChange)="onFieldChange('status', $event)">
+    </app-status-badge>
+</td>
+
+<td>
+    <div class="poc-card" (click)="openContacts.emit(job)">
+        @if (job.poc.length > 0) {
+        <div class="d-flex align-items-center gap-2">
+            <div class="avatar-sm">
+                {{ job.poc[0].name.charAt(0) }}
+            </div>
+            <div class="poc-details">
+                <div class="poc-name">{{ job.poc[0].name }}</div>
+                <div class="poc-title">{{ job.poc[0].designation || 'Primary Contact' }}</div>
+            </div>
+        </div>
+        } @else {
+        <button class="btn btn-add-contact" (click)="$event.stopPropagation(); addContact.emit(job.id)">
+            <i class="bi bi-person-plus"></i>
+        </button>
+        }
+    </div>
+</td>
+
+<td>
+    <div class="d-flex gap-2 align-items-center">
+        @if (job.resumeUrl) {
+        <a [href]="job.resumeUrl" target="_blank" class="btn btn-sm btn-icon-link text-primary p-1" title="View Resume">
+            <i class="bi bi-file-earmark-person-fill fs-5"></i>
+        </a>
+        }
+        @if (job.coverLetterUrl) {
+        <a [href]="job.coverLetterUrl" target="_blank" class="btn btn-sm btn-icon-link text-success p-1"
+            title="View Cover Letter">
+            <i class="bi bi-file-earmark-text-fill fs-5"></i>
+        </a>
+        }
+        @if (!job.resumeUrl && !job.coverLetterUrl) {
+        <span class="text-muted small">None</span>
+        }
+    </div>
+</td>
+
+<td class="text-nowrap text-secondary font-monospace" style="font-size: 0.8rem;">
+    <app-inline-edit [value]="job.appliedDate" type="date" (save)="onFieldChange('appliedDate', $event)"
+        [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <div class="reminder-card p-2 rounded-3"
+        style="cursor: pointer; background: var(--bg-app); border: 1px solid var(--glass-border);"
+        (click)="openReminder.emit(job)">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history" [class.text-danger]="isOverdue(job.reminderDate)"
+                [class.text-primary]="job.reminderDate && !isOverdue(job.reminderDate)"
+                [class.text-muted]="!job.reminderDate"></i>
+            <div class="d-flex flex-column">
+                <span [class.text-danger]="isOverdue(job.reminderDate)" [class.fw-bold]="job.reminderDate"
+                    style="font-size: 0.85rem;" [class.text-muted]="!job.reminderDate">
+                    {{ job.reminderDate ? (job.reminderDate | date:'MMM d, yyyy') : 'Set reminder' }}
+                </span>
+                @if (job.reminderNote) {
+                <span class="text-muted text-truncate" style="max-width: 130px; line-height: 1.2; font-size: 0.75rem;"
+                    [title]="job.reminderNote">
+                    {{ job.reminderNote }}
+                </span>
+                }
+            </div>
+            @if (isOverdue(job.reminderDate)) {
+            <span class="overdue-pulse ms-auto" title="Deadline passed"></span>
+            }
+        </div>
+    </div>
+</td>
+
+<td>
+    <app-inline-edit [value]="job.sourcePlatform" type="select"
+        [options]="['LinkedIn', 'Indeed', 'Glassdoor', 'AngelList', 'Company Website', 'Referral', 'Other']"
+        (save)="onFieldChange('sourcePlatform', $event)" placeholder="Source" [showIcon]="true">
+    </app-inline-edit>
+</td>
+
+<td>
+    <button class="btn-jd-preview" (click)="openJD.emit(job)" [title]="job.jobDescription || 'No description'">
+        <i class="bi bi-file-earmark-text"></i>
+        <span class="jd-snippet">View JD</span>
+    </button>
+</td>
+
+<td class="text-end">
+    <a *ngIf="job.postURL" [href]="job.postURL" target="_blank" rel="noopener" class="btn btn-icon-link"
+        title="View original posting">
+        <i class="bi bi-box-arrow-up-right"></i>
+    </a>
+    <button class="btn btn-delete-row" (click)="delete.emit(job)" title="Remove Application">
+        <i class="bi bi-trash3"></i>
+    </button>
+</td>

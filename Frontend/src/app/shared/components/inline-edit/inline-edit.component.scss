@@ -1,0 +1,98 @@
+@use '../../../../styles/abstracts/variables' as v;
+
+.inline-edit-container {
+    position: relative;
+    min-width: 40px;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.display-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+
+    &:hover {
+        background: rgba(124, 58, 237, 0.08);
+
+        .edit-hint {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .value-text {
+        font-size: 0.95rem;
+        color: var(--text-main);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 500;
+    }
+
+    .edit-hint {
+        font-size: 0.75rem;
+        color: var(--primary-vibrant);
+        opacity: 0;
+        transform: scale(0.85);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+.premium-input {
+    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    color: var(--text-main);
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-size: 0.9rem;
+    height: 32px;
+    transition: all 0.2s ease;
+
+    &:focus {
+        border-color: var(--primary-vibrant);
+        box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+}
+
+.action-buttons {
+    display: flex;
+    gap: 2px;
+
+    .btn {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        transition: all 0.2s ease;
+
+        &.btn-done {
+            background: #10B981;
+            color: white;
+
+            &:hover {
+                background: #059669;
+                transform: scale(1.05);
+            }
+        }
+
+        &.btn-cancel {
+            background: #EF4444;
+            color: white;
+
+            &:hover {
+                background: #DC2626;
+                transform: scale(1.05);
+            }
+        }
+    }
+}

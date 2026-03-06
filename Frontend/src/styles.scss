@@ -1,0 +1,149 @@
+:root {
+  --primary-vibrant: #7C3AED;
+  --primary-glow: rgba(124, 58, 237, 0.15);
+  --secondary-accent: #06B6D4;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --bg-app: #F5F3FF;
+  --card-bg: white;
+  --grad-1: hsla(253, 16%, 90%, 1);
+  --grad-2: hsla(225, 39%, 95%, 1);
+  --grad-3: hsla(339, 49%, 95%, 1);
+}
+
+[data-bs-theme="dark"] {
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --text-main: #FFFFFF;
+  --text-muted: #CBD5E1;
+  --bg-app: #020617;
+  --card-bg: #1E293B;
+  --grad-1: hsla(253, 16%, 5%, 1);
+  --grad-2: hsla(225, 39%, 8%, 1);
+  --grad-3: hsla(339, 49%, 8%, 1);
+
+  h1,
+  h2,
+  h3,
+  .h1,
+  .h2,
+  .h3 {
+    background: linear-gradient(135deg, #F9FAFB 0%, #D1D5DB 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logo-box {
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.5);
+  }
+}
+
+// ── BOOTSTRAP OVERRIDES ──────────────────────────────────────────────
+$primary: #7C3AED;
+$primary-light: #EDE9FE;
+$border-radius: 12px;
+$font-family-base: 'Outfit', 'Inter', sans-serif;
+
+@import 'bootstrap/scss/bootstrap';
+
+// ── GLOBAL RESET & BASE ──────────────────────────────────────────────
+body {
+  background: var(--bg-app);
+  background-image:
+    radial-gradient(at 0% 0%, var(--grad-1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, var(--grad-2) 0, transparent 50%),
+    radial-gradient(at 100% 0%, var(--grad-3) 0, transparent 50%);
+  background-attachment: fixed;
+  background-size: cover;
+  color: var(--text-main);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// ── GLASSMORPHISM COMPONENTS ─────────────────────────────────────────
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.1);
+  }
+}
+
+// ── PREMIUM TYPOGRAPHY ───────────────────────────────────────────────
+h1,
+h2,
+h3,
+.h1,
+.h2,
+.h3 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #1F2937 0%, #4B5563 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// ── ANIMATIONS ───────────────────────────────────────────────────────
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+// ── CUSTOM SCROLLBAR ──────────────────────────────────────────────────
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.2);
+  border-radius: 10px;
+
+  &:hover {
+    background: rgba(124, 58, 237, 0.4);
+  }
+}
+
+// ── MAT DIALOG OVERRIDE FOR BOOTSTRAP LOOK ─────────────────────────
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 20px;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  .mdc-dialog__surface {
+    background: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    padding: 0;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px !important;
+  }
+}

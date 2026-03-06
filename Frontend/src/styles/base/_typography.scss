@@ -1,0 +1,34 @@
+@use '../abstracts/variables' as v;
+
+body {
+    font-family: v.$font-family-base;
+    font-size: v.$font-size-base;
+    color: v.$color-text-primary;
+    background-color: v.$color-background;
+}
+
+h1,
+.h1 {
+    font-size: v.$font-size-xl;
+    font-weight: v.$font-weight-bold;
+    margin-bottom: v.$space-4;
+}
+
+h2,
+.h2 {
+    font-size: v.$font-size-lg;
+    font-weight: v.$font-weight-semibold;
+    margin-bottom: v.$space-3;
+}
+
+h3,
+.h3 {
+    font-size: v.$font-size-md;
+    font-weight: v.$font-weight-medium;
+    margin-bottom: v.$space-2;
+}
+
+small,
+.small {
+    font-size: v.$font-size-sm;
+}

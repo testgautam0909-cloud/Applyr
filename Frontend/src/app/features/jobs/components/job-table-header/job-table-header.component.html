@@ -1,0 +1,38 @@
+<tr>
+    <th class="sortable" (click)="toggleSort('jobTitle')">
+        Job Title
+        @if (sortColumn === 'jobTitle') {
+        <i class="bi ps-1" [class.bi-arrow-up]="sortDirection === 'asc'"
+            [class.bi-arrow-down]="sortDirection === 'desc'"></i>
+        }
+    </th>
+    <th class="sortable" (click)="toggleSort('company')">
+        Company
+        @if (sortColumn === 'company') {
+        <i class="bi ps-1" [class.bi-arrow-up]="sortDirection === 'asc'"
+            [class.bi-arrow-down]="sortDirection === 'desc'"></i>
+        }
+    </th>
+    <th>Location</th>
+    <th>Tech Stack</th>
+    <th>Status</th>
+    <th>Contact</th>
+    <th>Documents</th>
+    <th class="sortable" (click)="toggleSort('appliedDate')">
+        Applied
+        @if (sortColumn === 'appliedDate') {
+        <i class="bi ps-1" [class.bi-arrow-up]="sortDirection === 'asc'"
+            [class.bi-arrow-down]="sortDirection === 'desc'"></i>
+        }
+    </th>
+    <th class="sortable" (click)="toggleSort('reminderDate')">
+        Reminder
+        @if (sortColumn === 'reminderDate') {
+        <i class="bi ps-1" [class.bi-arrow-up]="sortDirection === 'asc'"
+            [class.bi-arrow-down]="sortDirection === 'desc'"></i>
+        }
+    </th>
+    <th>Source</th>
+    <th>Job Description</th>
+    <th class="text-end">Actions</th>
+</tr>

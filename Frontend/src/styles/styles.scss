@@ -1,0 +1,18 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Root Stylesheet - Job Application Tracker
+   ────────────────────────────────────────────────────────────────────────── */
+
+// Abstracts (Variables and Mixins)
+@forward 'abstracts/variables';
+@forward 'abstracts/mixins';
+
+// Base Styles
+@use 'base/reset';
+@use 'base/typography';
+@use 'base/animations';
+
+// Utility Classes
+@use 'utilities/helpers';
+
+// Shared Component Styles
+@use 'components/table';

@@ -1,0 +1,90 @@
+import Job from '../model/job.model.js';
+import { Evaluation } from '../model/evaluation.model.js';
+import { GoogleDriveService } from './googleDrive.service.js';
+import type { IJob } from '../interface/job.interface.js';
+import type { AIJobData } from '../interface/job.interface.js';
+
+export class JobService {
+    async getAllJobs(): Promise<IJob[]> {
+        try {
+            return await Job.find().sort({ createdAt: -1 });
+        } catch (error) {
+            throw new Error(`Failed to fetch jobs: ${error}`);
+        }
+    }
+
+    async getJobById(id: string): Promise<IJob | null> {
+        try {
+            return await Job.findById(id);
+        } catch (error) {
+            throw new Error(`Failed to fetch job: ${error}`);
+        }
+    }
+
+    async createJob(jobData: Partial<IJob>): Promise<IJob> {
+        try {
+            const job = new Job(jobData);
+            return await job.save();
+        } catch (error) {
+            throw new Error(`Failed to create job: ${error}`);
+        }
+    }
+
+    async createJobFromAI(aiJobData: AIJobData): Promise<IJob> {
+        try {
+            const jobData: Partial<IJob> = {
+                jobTitle: aiJobData.jobTitle,
+                company: aiJobData.company,
+                location: aiJobData.location,
+                techStack: aiJobData.techStack,
+                experience: aiJobData.experience,
+                status: aiJobData.status,
+                appliedDate: aiJobData.appliedDate,
+                reminderDate: aiJobData.reminderDate,
+                postURL: aiJobData.postURL,
+                resumeUrl: aiJobData.resumeUrl,
+                coverLetterUrl: aiJobData.coverLetterUrl,
+                poc: aiJobData.poc,
+                jobDescription: aiJobData.jobDescription,
+                sourcePlatform: aiJobData.sourcePlatform,
+            };
+
+            const job = new Job(jobData);
+            return await job.save();
+        } catch (error) {
+            throw new Error(`Failed to create job from AI data: ${error}`);
+        }
+    }
+
+    async updateJob(id: string, jobData: Partial<IJob>): Promise<IJob | null> {
+        try {
+            return await Job.findByIdAndUpdate(id, jobData, { new: true });
+        } catch (error) {
+            throw new Error(`Failed to update job: ${error}`);
+        }
+    }
+
+    async deleteJob(id: string): Promise<IJob | null> {
+        try {
+            const job = await Job.findByIdAndDelete(id);
+            if (job) {
+                await Evaluation.deleteMany({ jobId: id }).catch(e => console.error('Failed to delete associated evaluation', e));
+
+                const driveService = new GoogleDriveService();
+                if (job.resumeUrl) await driveService.deleteFileByUrl(job.resumeUrl);
+                if (job.coverLetterUrl) await driveService.deleteFileByUrl(job.coverLetterUrl);
+            }
+            return job;
+        } catch (error) {
+            throw new Error(`Failed to delete job: ${error}`);
+        }
+    }
+
+    async getJobsByStatus(status: string): Promise<IJob[]> {
+        try {
+            return await Job.find({ status }).sort({ createdAt: -1 });
+        } catch (error) {
+            throw new Error(`Failed to fetch jobs by status: ${error}`);
+        }
+    }
+}

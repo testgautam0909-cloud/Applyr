@@ -1,0 +1,132 @@
+<div class="container-fluid py-5 px-md-5">
+
+    <!-- Analytics Dashboard -->
+    <div class="row g-4 mb-4 fade-in">
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Total Applied</h6>
+                        <h2 class="mb-0 fw-bold">{{ store.totalApplications() }}</h2>
+                    </div>
+                    <div class="stat-icon bg-primary text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-send-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Interviews</h6>
+                        <h2 class="mb-0 fw-bold text-warning">{{ store.activeInterviews() }}</h2>
+                    </div>
+                    <div class="stat-icon bg-warning text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-headphones fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Offers</h6>
+                        <h2 class="mb-0 fw-bold text-success">{{ store.offersReceived() }}</h2>
+                        <small class="text-success fw-bold">{{ store.successRate() }} rate</small>
+                    </div>
+                    <div class="stat-icon bg-success text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-trophy-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Upcoming Reminders</h6>
+                        <h2 class="mb-0 fw-bold text-info">{{ store.upcomingRemindersCount() }}</h2>
+                    </div>
+                    <div class="stat-icon bg-info text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-calendar-event fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Area -->
+    <div class="glass-card mb-5 p-4 fade-in" style="animation-delay: 0.1s;">
+        <div class="row g-4 align-items-center">
+            <!-- Search -->
+            <div class="col-lg-4">
+                <div class="premium-search-group">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="form-control premium-search shadow-none" placeholder="Search anything..."
+                        [value]="store.searchTerm()" (input)="onSearch($event)">
+                </div>
+            </div>
+
+            <!-- Status Filters -->
+            <div class="col-lg-8">
+                <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                    <button *ngFor="let status of statusOptions" class="btn filter-pill shadow-none"
+                        [class.active]="store.statusFilter().includes(status)" (click)="toggleStatusFilter(status)">
+                        {{ status }}
+                        <span class="count">{{ store.statusCounts()[status] || 0 }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="fade-in" style="animation-delay: 0.2s;">
+        <app-job-table [jobs]="store.pagedJobs()" [sortColumn]="store.sortColumn()"
+            [sortDirection]="store.sortDirection()" (sort)="store.setSort($event)" (updateField)="onUpdateField($event)"
+            (delete)="onDeleteJob($event)" (openContacts)="openContacts($event)" (addContact)="addContact($event)"
+            (openTechStack)="openTechStack($event)" (openJD)="openJobDescription($event)"
+            (openReminder)="openReminderModal($event)">
+        </app-job-table>
+
+        <!-- Pagination Bar -->
+        <div
+            class="mt-4 glass-card p-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div class="pagination-info">
+                Showing <span class="fw-bold">{{ store.pagedJobs().length }}</span> of <span class="fw-bold">{{
+                    store.totalCount() }}</span> roles
+                <select class="ms-3 select-premium shadow-none" [value]="store.pageSize()"
+                    (change)="onPageSizeChange($event)">
+                    <option [value]="5">5 per page</option>
+                    <option [value]="10">10 per page</option>
+                    <option [value]="25">25 per page</option>
+                </select>
+            </div>
+
+            <nav>
+                <ul class="pagination pagination-premium mb-0 shadow-none">
+                    <li class="page-item" [class.disabled]="store.currentPage() === 0">
+                        <button class="page-link shadow-none" (click)="onPageChange(store.currentPage() - 1)">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link">{{ store.currentPage() + 1 }}</span>
+                    </li>
+                    <li class="page-item"
+                        [class.disabled]="(store.currentPage() + 1) * store.pageSize() >= store.totalCount()">
+                        <button class="page-link shadow-none" (click)="onPageChange(store.currentPage() + 1)">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
