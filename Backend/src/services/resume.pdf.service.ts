@@ -361,9 +361,24 @@ ${awardsHTML ? `
         }
 
         const outputPath = path.join(process.cwd(), `output_${Date.now()}.pdf`);
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
+        const options: any = {
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+            ],
+        };
+
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+            options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+
+        const browser = await puppeteer.launch(options);
         const page = await browser.newPage();
         await page.setContent(this.buildHTML(resumeJSON), { waitUntil: 'networkidle0' });
         await page.pdf({
