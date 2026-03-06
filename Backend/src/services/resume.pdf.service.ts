@@ -214,7 +214,7 @@ export class ResumePDFService {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Arial', sans-serif;
-    font-size: 10.5px;
+    font-size: 12px;
     line-height: 1.4;
     color: #111;
     -webkit-print-color-adjust: exact;
@@ -229,13 +229,13 @@ export class ResumePDFService {
     margin-bottom: 2px;
   }
   .label {
-    font-size: 11px;
+    font-size: 12px;
     color: #333;
     text-align: center;
     margin-bottom: 2px;
   }
   .contact {
-    font-size: 10px;
+    font-size: 12px;
     color: #222;
     text-align: center;
     margin-bottom: 10px;
@@ -245,7 +245,7 @@ export class ResumePDFService {
   /* ── Section titles — ATS parses these ── */
   .sec { margin-top: 10px; }
   .sec-title {
-    font-size: 10.5px;
+    font-size: 12px;
     font-weight: 700;
     border-bottom: 1.5px solid #000;
     padding-bottom: 1px;
@@ -255,7 +255,7 @@ export class ResumePDFService {
   }
 
   /* ── Summary ── */
-  p.summary { font-size: 10.5px; text-align: left; }
+  p.summary { font-size: 12px; text-align: left; }
 
   /* ── Work / project entries ── */
   .entry { margin-bottom: 7px; }
@@ -264,16 +264,16 @@ export class ResumePDFService {
     justify-content: space-between;
     align-items: baseline;
   }
-  .company { font-weight: 700; font-size: 10.5px; }
-  .loc     { font-size: 10px; color: #444; }
+  .company { font-weight: 700; font-size: 12px; }
+  .loc     { font-size: 12px; color: #444; }
   .sub {
-    font-size: 10px;
+    font-size: 12px;
     color: #333;
     margin-bottom: 2px;
     display: flex;
     justify-content: space-between;
   }
-  .dates { font-size: 10px; color: #444; }
+  .dates { font-size: 12px; color: #444; }
 
   /* ── Bullets ── */
   ul {
@@ -281,14 +281,14 @@ export class ResumePDFService {
     padding: 0;
     list-style-type: disc;
   }
-  li { margin-bottom: 1px; font-size: 10px; text-align: left; }
+  li { margin-bottom: 1px; font-size: 12px; text-align: left; }
 
   /* ── Projects ── */
-  .proj-desc { font-size: 10px; margin-bottom: 2px; }
-  .proj-link { font-size: 9.5px; font-weight: normal; color: #111; text-decoration: underline; }
+  .proj-desc { font-size: 12px; margin-bottom: 2px; }
+  .proj-link { font-size: 12px; font-weight: normal; color: #111; text-decoration: underline; }
 
   /* ── Skills ── */
-  .skill-line { font-size: 10px; margin-bottom: 2px; }
+  .skill-line { font-size: 12px; margin-bottom: 2px; }
 </style>
 </head>
 <body>
