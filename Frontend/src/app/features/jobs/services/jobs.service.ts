@@ -10,19 +10,45 @@ export class JobsService {
     private readonly apiUrl = `${environment.apiUrl}/jobs`;
 
     private readonly _jobs = signal<JobApplication[]>([]);
+    private readonly _loading = signal<boolean>(false);
+    private readonly _error = signal<string | null>(null);
+
     readonly jobs = this._jobs.asReadonly();
+    readonly loading = this._loading.asReadonly();
+    readonly error = this._error.asReadonly();
     readonly isEmpty = computed(() => this._jobs().length === 0);
+    readonly apiBaseUrl = environment.apiUrl;
 
     constructor() {
         this.fetchJobs();
     }
 
-    private async fetchJobs() {
+    async fetchJobs(params?: { search?: string, status?: string[] }) {
+        this._loading.set(true);
+        this._error.set(null);
         try {
-            const jobs = await lastValueFrom(this.http.get<JobApplication[]>(this.apiUrl));
+            let url = this.apiUrl;
+            const queryParams = new URLSearchParams();
+
+            if (params?.search) {
+                queryParams.append('search', params.search);
+            }
+            if (params?.status && params.status.length > 0) {
+                params.status.forEach(s => queryParams.append('status', s));
+            }
+
+            const queryString = queryParams.toString();
+            if (queryString) {
+                url += `?${queryString}`;
+            }
+
+            const jobs = await lastValueFrom(this.http.get<JobApplication[]>(url));
             this._jobs.set(jobs);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to fetch jobs from API', error);
+            this._error.set(error.message || 'Unknown connection error');
+        } finally {
+            this._loading.set(false);
         }
     }
 

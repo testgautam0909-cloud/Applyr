@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { JobApplication } from '../../models/job.model';
 import { JobTableRowComponent } from '../job-table-row/job-table-row.component';
 import { JobTableHeaderComponent } from '../job-table-header/job-table-header.component';
+import { JobsService } from '../../services/jobs.service';
 
 @Component({
   selector: 'app-job-table',
@@ -13,6 +14,7 @@ import { JobTableHeaderComponent } from '../job-table-header/job-table-header.co
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JobTableComponent {
+  protected readonly service = inject(JobsService);
   @Input({ required: true }) jobs: JobApplication[] = [];
   @Input() sortColumn = '';
   @Input() sortDirection: 'asc' | 'desc' = 'asc';

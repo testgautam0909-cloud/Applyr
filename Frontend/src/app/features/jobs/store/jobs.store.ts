@@ -1,5 +1,5 @@
-import { computed, inject } from '@angular/core';
-import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
+import { computed, inject, effect } from '@angular/core';
+import { signalStore, withState, withComputed, withMethods, patchState, withHooks } from '@ngrx/signals';
 import { JobsService } from '../services/jobs.service';
 import { JobApplication, JobStatus } from '../models/job.model';
 
@@ -25,27 +25,12 @@ export const JobsStore = signalStore(
     { providedIn: 'root' },
     withState(INITIAL_STATE),
     withComputed((state, service = inject(JobsService)) => {
+        // Now just returns what the service has (server-side filtered)
         const filteredJobs = computed(() => {
-            let jobs = [...service.jobs()];
-
-            const term = state.searchTerm().toLowerCase().trim();
-            if (term) {
-                jobs = jobs.filter(
-                    (j) =>
-                        j.jobTitle.toLowerCase().includes(term) ||
-                        j.company.toLowerCase().includes(term) ||
-                        j.location.toLowerCase().includes(term) ||
-                        j.status.toLowerCase().includes(term)
-                );
-            }
-
-            const statusFilter = state.statusFilter();
-            if (statusFilter && statusFilter.length > 0) {
-                jobs = jobs.filter((j) => statusFilter.includes(j.status));
-            }
-
+            const jobs = [...service.jobs()];
             const col = state.sortColumn();
             const dir = state.sortDirection();
+
             jobs.sort((a, b) => {
                 const aVal = String(a[col] ?? '');
                 const bVal = String(b[col] ?? '');
@@ -56,6 +41,8 @@ export const JobsStore = signalStore(
             return jobs;
         });
 
+        // Still computed for UI counts, but based on all jobs if possible
+        // Note: For true server-side counts, the API would need to return metadata
         const statusCounts = computed(() => {
             const jobs = service.jobs();
             const counts: Record<string, number> = {
@@ -67,24 +54,7 @@ export const JobsStore = signalStore(
             return counts;
         });
 
-        const totalCount = computed(() => {
-            let jobs = [...service.jobs()];
-            const term = state.searchTerm().toLowerCase().trim();
-            if (term) {
-                jobs = jobs.filter(
-                    (j) =>
-                        j.jobTitle.toLowerCase().includes(term) ||
-                        j.company.toLowerCase().includes(term) ||
-                        j.location.toLowerCase().includes(term) ||
-                        j.status.toLowerCase().includes(term)
-                );
-            }
-            const statusFilter = state.statusFilter();
-            if (statusFilter && statusFilter.length > 0) {
-                jobs = jobs.filter((j) => statusFilter.includes(j.status));
-            }
-            return jobs.length;
-        });
+        const totalCount = computed(() => filteredJobs().length);
 
         const pagedJobs = computed(() => {
             const filtered = filteredJobs();
@@ -134,12 +104,12 @@ export const JobsStore = signalStore(
             upcomingRemindersCount
         };
     }),
-    withMethods((store) => ({
+    withMethods((store, service = inject(JobsService)) => ({
         setSearchTerm(term: string): void {
-            patchState(store, { searchTerm: term });
+            patchState(store, { searchTerm: term, currentPage: 0 });
         },
         setStatusFilter(status: JobStatus[]): void {
-            patchState(store, { statusFilter: status });
+            patchState(store, { statusFilter: status, currentPage: 0 });
         },
         setSort(column: keyof JobApplication): void {
             const currentCol = store.sortColumn();
@@ -155,6 +125,25 @@ export const JobsStore = signalStore(
         },
         setPageSize(pageSize: number): void {
             patchState(store, { pageSize, currentPage: 0 });
+        },
+        // Call it from withHooks to sync
+        async refresh(): Promise<void> {
+            await service.fetchJobs({
+                search: store.searchTerm(),
+                status: store.statusFilter()
+            });
         }
-    }))
+    })),
+    withHooks({
+        onInit(store) {
+            effect(() => {
+                // React to search and status changes
+                const search = store.searchTerm();
+                const status = store.statusFilter();
+
+                // Trigger refresh from service
+                store.refresh();
+            });
+        },
+    })
 );

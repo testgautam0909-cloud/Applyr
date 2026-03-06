@@ -35,8 +35,10 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-1 fw-bold">Offers</h6>
-                        <h2 class="mb-0 fw-bold text-success">{{ store.offersReceived() }}</h2>
-                        <small class="text-success fw-bold">{{ store.successRate() }} rate</small>
+                        <div class="d-flex align-items-center gap-2">
+                            <h2 class="mb-0 fw-bold text-success">{{ store.offersReceived() }}</h2>
+                            <small class="text-success fw-bold">{{ store.successRate() }} rate</small>
+                        </div>
                     </div>
                     <div class="stat-icon bg-success text-white rounded-circle d-flex"
                         style="width: 48px; height: 48px; justify-content: center; align-items: center;">
@@ -65,17 +67,18 @@
     <div class="glass-card mb-5 p-4 fade-in" style="animation-delay: 0.1s;">
         <div class="row g-4 align-items-center">
             <!-- Search -->
-            <div class="col-lg-4">
+            <div class="col-lg-6">
                 <div class="premium-search-group">
                     <i class="bi bi-search search-icon"></i>
-                    <input type="text" class="form-control premium-search shadow-none" placeholder="Search anything..."
-                        [value]="store.searchTerm()" (input)="onSearch($event)">
+                    <input type="text" class="form-control premium-search shadow-none"
+                        placeholder="Search by title, company, or status..." [value]="store.searchTerm()"
+                        (input)="onSearch($event)">
                 </div>
             </div>
 
             <!-- Status Filters -->
-            <div class="col-lg-8">
-                <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap gap-2 justify-content-lg-end mt-2">
                     <button *ngFor="let status of statusOptions" class="btn filter-pill shadow-none"
                         [class.active]="store.statusFilter().includes(status)" (click)="toggleStatusFilter(status)">
                         {{ status }}
@@ -87,7 +90,7 @@
     </div>
 
     <!-- Table Container -->
-    <div class="fade-in" style="animation-delay: 0.2s;">
+    <div class="fade-in p-1" style="animation-delay: 0.2s;">
         <app-job-table [jobs]="store.pagedJobs()" [sortColumn]="store.sortColumn()"
             [sortDirection]="store.sortDirection()" (sort)="store.setSort($event)" (updateField)="onUpdateField($event)"
             (delete)="onDeleteJob($event)" (openContacts)="openContacts($event)" (addContact)="addContact($event)"

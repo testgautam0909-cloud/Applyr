@@ -7,7 +7,24 @@ const jobService = new JobService();
 
 export const getJobs = async (req: Request, res: Response) => {
     try {
-        const jobs = await Job.find().sort({ appliedDate: -1 });
+        const { search, status } = req.query;
+        let query: any = {};
+
+        if (search) {
+            const searchRegex = new RegExp(search as string, 'i');
+            query.$or = [
+                { jobTitle: searchRegex },
+                { company: searchRegex },
+                { location: searchRegex }
+            ];
+        }
+
+        if (status) {
+            const statusArray = Array.isArray(status) ? status : [status];
+            query.status = { $in: statusArray };
+        }
+
+        const jobs = await Job.find(query).sort({ appliedDate: -1 });
         res.json(jobs);
     } catch (error: any) {
         res.status(500).json({ message: error.message });

@@ -1,4 +1,4 @@
-<div class="table-container glass-card overflow-hidden">
+<div class="table-container glass-card p-3">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 premium-table">
             <thead app-job-table-header class="table-light-glass" [sortColumn]="sortColumn"
@@ -14,12 +14,35 @@
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="9" class="text-center py-5">
+                    <td colspan="12" class="text-center py-5">
                         <div class="empty-state-glow mb-3">
-                            <i class="bi bi-inbox fs-1 text-primary"></i>
+                            <i class="bi bi-cloud-slash-fill fs-1 text-primary" *ngIf="service.error()"></i>
+                            <i class="bi bi-inbox fs-1 text-primary" *ngIf="!service.error()"></i>
                         </div>
-                        <h5 class="fw-bold mb-1">No applications yet</h5>
-                        <p class="text-muted small">Your future job is waiting to be added!</p>
+
+                        <div *ngIf="service.loading()" class="mb-3">
+                            <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                            <span class="text-muted small">Connecting to API...</span>
+                        </div>
+
+                        <div *ngIf="service.error()" class="mb-3">
+                            <h5 class="fw-bold text-danger mb-1">Connection Refused</h5>
+                            <p class="text-muted small mb-3">Could not reach the backend API at <br>
+                                <code class="bg-light p-1 rounded">{{ service.apiBaseUrl }}</code>
+                            </p>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-4"
+                                (click)="service.fetchJobs()">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Try Reconnect
+                            </button>
+                        </div>
+
+                        <div *ngIf="!service.loading() && !service.error()">
+                            <h5 class="fw-bold mb-1">No applications yet</h5>
+                            <p class="text-muted small">Your future job is waiting to be added!</p>
+                            <div class="mt-2 text-muted" style="font-size: 0.7rem;">
+                                <i class="bi bi-check-circle-fill text-success"></i> API Connected
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 }

@@ -1,14 +1,33 @@
 .table-container {
     border: 1px solid rgba(255, 255, 255, 0.4);
+    overflow-x: auto;
 }
 
 .premium-table {
     border-collapse: separate;
     border-spacing: 0;
+    min-width: 1200px;
+    table-layout: auto !important;
 
-    ::ng-deep thead.table-light-glass {
-        background: rgba(249, 250, 251, 0.8) !important;
-        backdrop-filter: blur(4px);
+    ::ng-deep {
+        thead.table-light-glass th {
+            padding: 0.5rem 0.5rem;
+            background: rgba(249, 250, 251, 0.8) !important;
+            backdrop-filter: blur(4px);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        tr {
+            height: 1px !important;
+        }
+
+        td {
+            padding: 0.4rem 0.5rem;
+            vertical-align: middle;
+            height: 1px !important;
+        }
     }
 }
 
