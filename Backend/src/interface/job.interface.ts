@@ -16,6 +16,7 @@ export interface AIJobData {
     status: JobStatus;
     appliedDate: string;        // YYYY-MM-DD
     reminderDate: string;        // YYYY-MM-DD
+    reminderNote?: string;
     resumeUrl: string;
     coverLetterUrl: string;
     poc: PointOfContact[];
@@ -41,6 +42,7 @@ export interface IJob extends Document {
     status: string;
     appliedDate: string;
     reminderDate: string;
+    reminderNote?: string;
     resumeUrl: string;
     coverLetterUrl: string;
     jobDescription: string;

@@ -11,6 +11,7 @@ const JobSchema: Schema = new Schema({
     status: { type: String, required: true },
     appliedDate: { type: String },
     reminderDate: { type: String },
+    reminderNote: { type: String },
     resumeUrl: { type: String },
     coverLetterUrl: { type: String },
     sourcePlatform: { type: String },

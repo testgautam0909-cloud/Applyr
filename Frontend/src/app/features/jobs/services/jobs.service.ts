@@ -19,7 +19,6 @@ export class JobsService {
     private async fetchJobs() {
         try {
             const jobs = await lastValueFrom(this.http.get<JobApplication[]>(this.apiUrl));
-            console.log(jobs);
             this._jobs.set(jobs);
         } catch (error) {
             console.error('Failed to fetch jobs from API', error);

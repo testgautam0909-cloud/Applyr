@@ -28,6 +28,7 @@ export interface JobApplication {
     status: JobStatus;
     appliedDate: string; // stored as YYYY-MM-DD
     reminderDate: string; // stored as YYYY-MM-DD or ''
+    reminderNote?: string;
     postURL: string;
     resumeUrl: string;
     coverLetterUrl: string;
@@ -46,6 +47,7 @@ export interface UpdateJobPayload {
     status: JobStatus;
     appliedDate: string;
     reminderDate: string;
+    reminderNote?: string;
     postURL: string;
     resumeUrl: string;
     coverLetterUrl: string;

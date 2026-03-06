@@ -52,12 +52,13 @@ Return ONLY valid JSON (no markdown):
   "jobTitle": string, "company": string, "location": string, "techStack": string[],
   "experience": string, "status": "DISCOVERY", "appliedDate": "", "reminderDate": "",
   "resumeUrl": "", "coverLetterUrl": "", "jobDescription": string, "sourcePlatform": string,
-  "poc": [{ "name": string, "email": string, "mobile": string, "designation": string }]
+  "poc": [{ "name": string, "email": string, "mobile": string, "designation": "Recruiter" | "Hiring Manager" | "HR" | "Technical Lead" | "VP Engineering" | "Founder" | "CEO" | "Other" }]
 }
 jobDescription: structured string with sections:
 **About the Company** | **Role Overview** | **Responsibilities** | **Requirements** |
 **Qualifications** | **Nice to Have** | **Tech Stack** | **Application Process** | **Compensation & Benefits**
 Rules: missing fields → "" or [], dates → YYYY-MM-DD, location = actual job location.
+For 'poc.designation', use your best judgment to map their job title to one of the exact specified options.
 CONTENT: ${text}`;
     }
 

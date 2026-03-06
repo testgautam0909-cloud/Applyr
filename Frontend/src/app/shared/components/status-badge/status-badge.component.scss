@@ -71,11 +71,13 @@
 }
 
 .dot-indicator {
-    width: 6px;
-    height: 6px;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: currentColor;
     box-shadow: 0 0 8px currentColor;
+    margin-right: 4px;
 }
 
 .glass-menu {

@@ -24,6 +24,7 @@ export class JobTableComponent {
   @Output() addContact = new EventEmitter<string>();
   @Output() openTechStack = new EventEmitter<JobApplication>();
   @Output() openJD = new EventEmitter<JobApplication>();
+  @Output() openReminder = new EventEmitter<JobApplication>();
 
   protected onOpenContacts(job: JobApplication): void {
     this.openContacts.emit(job);

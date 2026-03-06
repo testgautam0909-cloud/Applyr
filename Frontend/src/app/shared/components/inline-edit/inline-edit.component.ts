@@ -14,13 +14,15 @@ import { FormsModule } from '@angular/forms';
 })
 export class InlineEditComponent {
     @Input({ required: true }) value: any;
-    @Input() type: 'text' | 'date' = 'text';
+    @Input() type: 'text' | 'date' | 'select' = 'text';
+    @Input() options: string[] = [];
     @Input() placeholder = '';
     @Input() showIcon = true;
 
     @Output() save = new EventEmitter<any>();
 
     @ViewChild('inputField') inputField?: ElementRef<HTMLInputElement>;
+    @ViewChild('selectField') selectField?: ElementRef<HTMLSelectElement>;
 
     protected isEditing = signal(false);
     protected editValue: any;
@@ -32,8 +34,12 @@ export class InlineEditComponent {
 
         // Auto-focus after a tick for the template to update
         setTimeout(() => {
-            this.inputField?.nativeElement.focus();
-            this.inputField?.nativeElement.select();
+            if (this.type === 'select') {
+                this.selectField?.nativeElement.focus();
+            } else {
+                this.inputField?.nativeElement.focus();
+                this.inputField?.nativeElement.select();
+            }
         });
     }
 

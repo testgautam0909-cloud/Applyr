@@ -15,12 +15,11 @@ interface ModelDef {
 interface KeySlot {
     index: number;
     key: string;
-    modelCooldowns: Map<string, number>; // modelId → exhaustedUntil ms
+    modelCooldowns: Map<string, number>;
 }
 
 type ErrorKind = 'DAILY' | 'MINUTE' | 'TRANSIENT' | 'FATAL';
 
-// ─── Models ───────────────────────────────────────────────────────────────────
 const MODELS: Record<string, ModelDef> = {
     'gemini-2.0-flash': { id: 'gemini-2.0-flash', isGemma: false },
     'gemini-1.5-flash': { id: 'gemini-1.5-flash', isGemma: false },

@@ -4,7 +4,6 @@ const { toArr, toScore } = ModelRouter;
 export class ResumeEvaluationService {
     constructor(private router: ModelRouter) { }
 
-    // ─── Step 1: Extract JD Keywords ─────────────────────────────────────────
     async extractKeywords(jd: string) {
         return this.router.callJSON(ModelRole.EXTRACTION, `
 Extract structured data from this job description.
@@ -21,8 +20,6 @@ Return ONLY valid JSON — no markdown, no explanation:
 }
 Job Description: ${jd}`);
     }
-
-    // ─── Section Evaluators (all run in parallel) ─────────────────────────────
 
     async compareSummary(summary: string, jd: string, keywords: any) {
         const raw = await this.router.callJSON(ModelRole.COMPARISON, `
@@ -170,7 +167,6 @@ Preferred: ${JSON.stringify(keywords.preferred_education ?? [])}`);
         };
     }
 
-    // ─── Merge all section evaluations into one score ────────────────────────
     merge(results: {
         summary: any;
         skills: any;
@@ -237,8 +233,6 @@ Preferred: ${JSON.stringify(keywords.preferred_education ?? [])}`);
             improvement_suggestions: [...new Set(suggestions)],
             notes: [...new Set(notes)],
             web_presence: results.webPresence,
-
-            // Raw section data — saved for use in optimizer (step 2)
             _sections: {
                 summary: results.summary,
                 skills: results.skills,
@@ -249,7 +243,6 @@ Preferred: ${JSON.stringify(keywords.preferred_education ?? [])}`);
         };
     }
 
-    // ─── Full Evaluation (runs all 5 sections in PARALLEL) ───────────────────
     async evaluate(resume: any, jd: string) {
         console.log('[EvaluationService] Extracting keywords + running all sections in parallel...');
         const t0 = Date.now();
@@ -257,7 +250,6 @@ Preferred: ${JSON.stringify(keywords.preferred_education ?? [])}`);
         const keywords = await this.extractKeywords(jd);
         const webPresence = this.checkWebPresence(resume);
 
-        // ← ALL 5 sections fire at the same time
         const [summary, skills, work, projects, education] = await Promise.all([
             this.compareSummary(resume.basics.summary, jd, keywords),
             this.compareSkills(resume.skills, jd, keywords),

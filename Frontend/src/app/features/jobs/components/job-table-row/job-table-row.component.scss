@@ -162,7 +162,6 @@
     border-radius: 8px;
     color: #9CA3AF;
     font-size: 0.85rem;
-    opacity: 0;
     transition: all 0.2s ease;
     text-decoration: none;
 
@@ -170,8 +169,4 @@
         color: #7C3AED;
         background: rgba(124, 58, 237, 0.08);
     }
-}
-
-:host:hover .btn-icon-link {
-    opacity: 1;
 }

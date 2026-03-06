@@ -27,6 +27,7 @@ export class JobTableRowComponent {
     @Output() addContact = new EventEmitter<string>();
     @Output() openTechStack = new EventEmitter<JobApplication>();
     @Output() openJD = new EventEmitter<JobApplication>();
+    @Output() openReminder = new EventEmitter<JobApplication>();
 
     protected onFieldChange(field: string, value: any): void {
         this.updateField.emit({ id: this.job.id, field, value });

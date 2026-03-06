@@ -7,9 +7,15 @@
 
     <!-- EDIT MODE -->
     <div *ngIf="isEditing()" class="edit-wrapper d-flex gap-1 align-items-center">
-        <input #inputField [type]="type" class="form-control form-control-sm premium-input" [(ngModel)]="editValue"
-            (keydown.enter)="saveEdit()" (keydown.escape)="cancelEdit()" (blur)="onBlur()" [placeholder]="placeholder"
+        <input *ngIf="type !== 'select'" #inputField [type]="type" class="form-control form-control-sm premium-input"
+            [(ngModel)]="editValue" (keydown.enter)="saveEdit()" (keydown.escape)="cancelEdit()" (blur)="onBlur()"
+            [placeholder]="placeholder" autofocus>
+
+        <select *ngIf="type === 'select'" #selectField class="form-select form-select-sm premium-input"
+            [(ngModel)]="editValue" (keydown.enter)="saveEdit()" (keydown.escape)="cancelEdit()" (blur)="onBlur()"
             autofocus>
+            <option *ngFor="let opt of options" [value]="opt">{{ opt }}</option>
+        </select>
 
         <div class="action-buttons">
             <button class="btn btn-done" (click)="saveEdit()">

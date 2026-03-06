@@ -32,7 +32,6 @@ export class ResumeService {
         this.jobService = new JobService();
     }
 
-    // ─── Groq fallback helper ────────────────────────────────────────────────
     private async callGroq(prompt: string, wantJson: boolean): Promise<string> {
         if (!config.groqApiKey) {
             return this.router.callText(ModelRole.EXTRACTION, prompt, 0.2);
@@ -59,7 +58,6 @@ export class ResumeService {
         }
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────────────────
     async getBaseResume() {
         return BaseResume.findOne();
     }
@@ -91,13 +89,7 @@ export class ResumeService {
         return resume;
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // API 1 — EVALUATE
-    // POST /resume/evaluate/:jobId
-    // Runs evaluation in parallel → saves to DB → returns evaluationId
-    // ═══════════════════════════════════════════════════════════════════════════
     async evaluateResume(jobId: string): Promise<{ evaluationId: string; evaluation: any }> {
-        console.log(`\n[ResumeService] ═══ API 1: Evaluate ═══ jobId=${jobId}`);
         const t0 = Date.now();
 
         const [baseResume, job] = await Promise.all([
@@ -108,10 +100,8 @@ export class ResumeService {
         if (!baseResume) throw new Error('Base resume not found');
         if (!job) throw new Error('Job not found');
 
-        // Run full evaluation (all 5 sections in parallel inside)
         const { merged, keywords } = await this.evaluator.evaluate(baseResume, job.jobDescription);
 
-        // Save to DB
         const saved: any = await Evaluation.create({
             jobId,
             hard_skills_match: merged.hard_skills_match,
@@ -124,13 +114,11 @@ export class ResumeService {
             improvement_suggestions: merged.improvement_suggestions,
             notes: merged.notes,
             web_presence: merged.web_presence,
-            // Store raw section data for optimizer (API 2)
             summary: merged._sections?.summary ?? {},
             skills: merged._sections?.skills ?? {},
             work: merged._sections?.work ?? [],
             projects: merged._sections?.projects ?? [],
             education: merged._sections?.education ?? {},
-            // Store keywords for optimizer (API 2)
             // @ts-ignore — we attach keywords for optimizer convenience
             _keywords: keywords,
         });
@@ -153,20 +141,13 @@ export class ResumeService {
         };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // API 2 — BUILD RESUME
-    // POST /resume/build/:evaluationId
-    // Loads saved evaluation → generates tailored resume + PDF → uploads to Drive → saves resumeUrl
-    // ═══════════════════════════════════════════════════════════════════════════
     async buildResume(evaluationId: string): Promise<{
         resumeUrl: string;
         tailoredResume: any;
         evaluation: any;
     }> {
-        console.log(`\n[ResumeService] ═══ API 2: Build Resume ═══ evaluationId=${evaluationId}`);
         const t0 = Date.now();
 
-        // Load saved evaluation
         const evaluation = await Evaluation.findById(evaluationId);
         if (!evaluation) throw new Error('Evaluation not found — run /evaluate first');
 
@@ -178,16 +159,12 @@ export class ResumeService {
         if (!baseResume) throw new Error('Base resume not found');
         if (!job) throw new Error('Job not found');
 
-        // Reconstruct resume copy with web presence injected
         const resumeCopy = this.injectWebPresence(JSON.parse(JSON.stringify(baseResume)));
 
-        // Get keywords (re-extract if not cached)
         let keywords = (evaluation as any)._keywords;
         if (!keywords) {
             keywords = await this.evaluator.extractKeywords(job.jobDescription);
         }
-
-        // Build evaluation object in the format optimizer expects
         const evalForOptimizer = {
             missing_keywords: evaluation.missing_keywords,
             improvement_suggestions: evaluation.improvement_suggestions,
@@ -201,42 +178,27 @@ export class ResumeService {
             },
         };
 
-        // ← Optimize ALL sections in PARALLEL
         const tailoredResume = await this.optimizer.optimizeAll(resumeCopy, evalForOptimizer, job.jobDescription, keywords);
 
-        // Generate PDF
-        console.log('[ResumeService] Generating PDF...');
         const pdfPath = await this.pdf.generate(tailoredResume);
 
-        // Upload to Google Drive
-        console.log('[ResumeService] Uploading to Google Drive...');
         const resumeUrl = await this.drive.uploadFile(
             pdfPath,
             `Resume_${job.jobTitle}_${job.company}_${Date.now()}.pdf`,
             'application/pdf',
         );
 
-        // Save URL to job
         await this.jobService.updateJob(evaluation.jobId, { resumeUrl });
-
-        console.log(`[ResumeService] Resume built in ${Date.now() - t0}ms | url=${resumeUrl}`);
 
         return { resumeUrl, tailoredResume, evaluation };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // API 3 — BUILD COVER LETTER
-    // POST /resume/cover-letter/:evaluationId
-    // Generates cover letter data + PDF → uploads to Drive → saves coverLetterUrl
-    // ═══════════════════════════════════════════════════════════════════════════
     async buildCoverLetter(evaluationId: string): Promise<{
         coverLetterUrl: string;
         coverLetterData: any;
     }> {
-        console.log(`\n[ResumeService] ═══ API 3: Build Cover Letter ═══ evaluationId=${evaluationId}`);
         const t0 = Date.now();
 
-        // Load saved evaluation
         const evaluation = await Evaluation.findById(evaluationId);
         if (!evaluation) throw new Error('Evaluation not found — run /evaluate first');
 
@@ -248,7 +210,6 @@ export class ResumeService {
         if (!baseResume) throw new Error('Base resume not found');
         if (!job) throw new Error('Job not found');
 
-        // Build cover letter data + PDF simultaneously feasible since data must come first
         const coverLetterData = await this.coverLetter.generateData(
             baseResume,
             job.jobDescription,
@@ -257,22 +218,14 @@ export class ResumeService {
             evaluation,
         );
 
-        // Generate PDF
-        console.log('[ResumeService] Generating cover letter PDF...');
-        const pdfPath = await this.coverLetter.generatePDF(coverLetterData);
-
-        // Upload to Google Drive
-        console.log('[ResumeService] Uploading cover letter to Google Drive...');
+        const pdfPath = await this.coverLetter.generatePDF(coverLetterData, baseResume);
         const coverLetterUrl = await this.drive.uploadFile(
             pdfPath,
             `CoverLetter_${job.jobTitle}_${job.company}_${Date.now()}.pdf`,
             'application/pdf',
         );
 
-        // Save URL to job
         await this.jobService.updateJob(evaluation.jobId, { coverLetterUrl });
-
-        console.log(`[ResumeService] Cover letter built in ${Date.now() - t0}ms | url=${coverLetterUrl}`);
 
         return { coverLetterUrl, coverLetterData };
     }

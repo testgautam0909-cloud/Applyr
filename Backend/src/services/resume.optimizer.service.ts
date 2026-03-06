@@ -36,7 +36,6 @@ export class ResumeOptimizerService {
         private callGroq: (prompt: string, json: boolean) => Promise<string>,
     ) { }
 
-    // ── Internal: Generate with Groq → QA-validate with Gemini ───────────────
     private async run(original: string, prompt: string, section: string, isJson: boolean): Promise<any> {
         const groqResult = await this.callGroq(prompt, isJson);
 
@@ -61,8 +60,6 @@ Return ONLY the corrected final content — no preamble, no explanation.`);
             catch { return JSON.parse(original); }
         }
     }
-
-    // ─── Section Optimizers ──────────────────────────────────────────────────
 
     async summary(text: string, evaluation: any, jd: string, keywords: any): Promise<string> {
         const jobTitle = String(keywords.role_seniority || 'Full Stack Engineer');
@@ -159,7 +156,6 @@ Job Description: ${jd}
 Return JSON array only.`, 'Awards', true);
     }
 
-    // ─── Full Optimize (ALL sections in PARALLEL, work/projects entries also parallel) ──
     async optimizeAll(resume: any, evaluation: any, jd: string, keywords: any): Promise<any> {
         console.log('[OptimizerService] Starting parallel optimization of all sections...');
         const t0 = Date.now();
@@ -169,19 +165,15 @@ Return JSON array only.`, 'Awards', true);
         const workEval = evaluation._sections?.work ?? [];
         const projectsEval = evaluation._sections?.projects ?? [];
 
-        // ── Work entries: all entries in PARALLEL ──────────────────────────
         const workPromises = resume.work.map((entry: any, i: number) => {
             const evalNote = toArr(workEval[i]?.improvement_suggestions).join('; ');
             return this.optimizeWorkEntry(entry, evalNote, jd, keywords);
         });
-
-        // ── Project entries: all entries in PARALLEL ───────────────────────
         const projectPromises = resume.projects.map((proj: any, i: number) => {
             const evalNote = toArr(projectsEval[i]?.improvement_suggestions).join('; ');
             return this.optimizeProjectEntry(proj, evalNote, jd, keywords);
         });
 
-        // ── Fire ALL sections at SAME TIME ─────────────────────────────────
         const [
             optimizedSummary,
             optimizedSkills,

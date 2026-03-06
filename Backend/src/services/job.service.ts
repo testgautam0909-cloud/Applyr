@@ -1,4 +1,6 @@
 import Job from '../model/job.model.js';
+import { Evaluation } from '../model/evaluation.model.js';
+import { GoogleDriveService } from './googleDrive.service.js';
 import type { IJob } from '../interface/job.interface.js';
 import type { AIJobData } from '../interface/job.interface.js';
 
@@ -64,7 +66,15 @@ export class JobService {
 
     async deleteJob(id: string): Promise<IJob | null> {
         try {
-            return await Job.findByIdAndDelete(id);
+            const job = await Job.findByIdAndDelete(id);
+            if (job) {
+                await Evaluation.deleteMany({ jobId: id }).catch(e => console.error('Failed to delete associated evaluation', e));
+
+                const driveService = new GoogleDriveService();
+                if (job.resumeUrl) await driveService.deleteFileByUrl(job.resumeUrl);
+                if (job.coverLetterUrl) await driveService.deleteFileByUrl(job.coverLetterUrl);
+            }
+            return job;
         } catch (error) {
             throw new Error(`Failed to delete job: ${error}`);
         }

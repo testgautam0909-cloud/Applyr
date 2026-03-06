@@ -31,6 +31,9 @@ export const config = {
         ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_PATH)
         : null,
     googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID,
+    googleClientId: process.env.GOOGLE_CLIENT_ID,
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    googleRefreshToken: process.env.GOOGLE_REFRESH_TOKEN,
     maxTextLength: 8000,
     maxRetries: 3,
     port: process.env.PORT || 3000,

@@ -9,6 +9,7 @@ import { AddContactModalComponent } from '../../../contacts/components/add-conta
 import { MultiContactModalComponent } from '../../../contacts/components/multi-contact-modal/multi-contact-modal.component';
 import { TechStackModalComponent } from '../../../tech-stack/components/tech-stack-modal/tech-stack-modal.component';
 import { JobDescriptionModalComponent } from '../../components/job-description-modal/job-description-modal.component';
+import { ReminderModalComponent } from '../../components/reminder-modal/reminder-modal.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
@@ -84,6 +85,13 @@ export class JobsPageComponent {
             width: '760px',
             maxHeight: '90vh',
             panelClass: 'jd-dialog-panel'
+        });
+    }
+
+    protected openReminderModal(job: JobApplication): void {
+        this.dialog.open(ReminderModalComponent, {
+            data: { job },
+            width: '450px'
         });
     }
 

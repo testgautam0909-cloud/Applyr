@@ -52,6 +52,25 @@
     </div>
 </td>
 
+<td>
+    <div class="d-flex gap-2 align-items-center">
+        @if (job.resumeUrl) {
+        <a [href]="job.resumeUrl" target="_blank" class="btn btn-sm btn-icon-link text-primary p-1" title="View Resume">
+            <i class="bi bi-file-earmark-person-fill fs-5"></i>
+        </a>
+        }
+        @if (job.coverLetterUrl) {
+        <a [href]="job.coverLetterUrl" target="_blank" class="btn btn-sm btn-icon-link text-success p-1"
+            title="View Cover Letter">
+            <i class="bi bi-file-earmark-text-fill fs-5"></i>
+        </a>
+        }
+        @if (!job.resumeUrl && !job.coverLetterUrl) {
+        <span class="text-muted small">None</span>
+        }
+    </div>
+</td>
+
 <td class="text-nowrap text-secondary font-monospace" style="font-size: 0.8rem;">
     <app-inline-edit [value]="job.appliedDate" type="date" (save)="onFieldChange('appliedDate', $event)"
         [showIcon]="true">
@@ -59,19 +78,36 @@
 </td>
 
 <td>
-    <div class="d-flex align-items-center gap-2">
-        <app-inline-edit [value]="job.reminderDate" type="date" placeholder="Remind me"
-            (save)="onFieldChange('reminderDate', $event)" [showIcon]="true">
-        </app-inline-edit>
-        @if (isOverdue(job.reminderDate)) {
-        <span class="overdue-pulse" title="Deadline passed"></span>
-        }
+    <div class="reminder-card p-2 rounded-3"
+        style="cursor: pointer; background: var(--bg-app); border: 1px solid var(--glass-border);"
+        (click)="openReminder.emit(job)">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history" [class.text-danger]="isOverdue(job.reminderDate)"
+                [class.text-primary]="job.reminderDate && !isOverdue(job.reminderDate)"
+                [class.text-muted]="!job.reminderDate"></i>
+            <div class="d-flex flex-column">
+                <span [class.text-danger]="isOverdue(job.reminderDate)" [class.fw-bold]="job.reminderDate"
+                    style="font-size: 0.85rem;" [class.text-muted]="!job.reminderDate">
+                    {{ job.reminderDate ? (job.reminderDate | date:'MMM d, yyyy') : 'Set reminder' }}
+                </span>
+                @if (job.reminderNote) {
+                <span class="text-muted text-truncate" style="max-width: 130px; line-height: 1.2; font-size: 0.75rem;"
+                    [title]="job.reminderNote">
+                    {{ job.reminderNote }}
+                </span>
+                }
+            </div>
+            @if (isOverdue(job.reminderDate)) {
+            <span class="overdue-pulse ms-auto" title="Deadline passed"></span>
+            }
+        </div>
     </div>
 </td>
 
 <td>
-    <app-inline-edit [value]="job.sourcePlatform" (save)="onFieldChange('sourcePlatform', $event)"
-        placeholder="Source Platform" [showIcon]="true">
+    <app-inline-edit [value]="job.sourcePlatform" type="select"
+        [options]="['LinkedIn', 'Indeed', 'Glassdoor', 'AngelList', 'Company Website', 'Referral', 'Other']"
+        (save)="onFieldChange('sourcePlatform', $event)" placeholder="Source" [showIcon]="true">
     </app-inline-edit>
 </td>
 

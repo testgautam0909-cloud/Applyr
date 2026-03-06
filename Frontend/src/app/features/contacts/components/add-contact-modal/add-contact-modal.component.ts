@@ -78,6 +78,9 @@ import { Subject, debounceTime, takeUntil } from 'rxjs';
                     <option value="HR">HR</option>
                     <option value="Technical Lead">Technical Lead</option>
                     <option value="VP Engineering">VP Engineering</option>
+                    <option value="Founder">Founder</option>
+                    <option value="CEO">CEO</option>
+                    <option value="Other">Other</option>
                 </select>
               </div>
           </div>

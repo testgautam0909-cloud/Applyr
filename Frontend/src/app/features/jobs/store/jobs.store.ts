@@ -93,11 +93,45 @@ export const JobsStore = signalStore(
             return filtered.slice(start, end);
         });
 
+        const totalApplications = computed(() => {
+            return service.jobs().filter(j => j.status !== JobStatus.DISCOVERY && j.status !== JobStatus.NOT_APPLIED).length;
+        });
+
+        const activeInterviews = computed(() => {
+            const activeStatuses = [JobStatus.PHONE_SCREEN, JobStatus.INTERVIEWING, JobStatus.TECHNICAL_TEST, JobStatus.FINAL_ROUND];
+            return service.jobs().filter(j => activeStatuses.includes(j.status)).length;
+        });
+
+        const offersReceived = computed(() => {
+            return service.jobs().filter(j => j.status === JobStatus.OFFER_RECEIVED).length;
+        });
+
+        const successRate = computed(() => {
+            const total = totalApplications();
+            if (total === 0) return '0%';
+            return Math.round((offersReceived() / total) * 100) + '%';
+        });
+
+        const upcomingRemindersCount = computed(() => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return service.jobs().filter(j => {
+                if (!j.reminderDate) return false;
+                const rDate = new Date(j.reminderDate);
+                return rDate >= today;
+            }).length;
+        });
+
         return {
             filteredJobs,
             statusCounts,
             totalCount,
-            pagedJobs
+            pagedJobs,
+            totalApplications,
+            activeInterviews,
+            offersReceived,
+            successRate,
+            upcomingRemindersCount
         };
     }),
     withMethods((store) => ({
