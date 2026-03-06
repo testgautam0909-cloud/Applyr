@@ -78,11 +78,37 @@ Return ONLY valid JSON with this structure:
 
         const html = this.buildHTML(data, baseResume);
 
-        const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        await page.pdf({ path: outputPath, format: 'A4', printBackground: true });
-        await browser.close();
+        const options: any = {
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+            ],
+        };
+
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+            options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+
+        console.log(`[Puppeteer-CoverLetter] Launching with options:`, JSON.stringify(options));
+        console.log(`[Puppeteer-CoverLetter] CWD:`, process.cwd());
+        console.log(`[Puppeteer-CoverLetter] __dirname:`, __dirname);
+
+        try {
+            const browser = await puppeteer.launch(options);
+            const page = await browser.newPage();
+            await page.setContent(html, { waitUntil: 'networkidle0' });
+            await page.pdf({ path: outputPath, format: 'A4', printBackground: true });
+            await browser.close();
+        } catch (error: any) {
+            console.error(`[Puppeteer-CoverLetter] Execution failed: ${error.message}`);
+            throw error;
+        }
 
         return outputPath;
     }

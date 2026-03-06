@@ -379,6 +379,8 @@ ${awardsHTML ? `
         }
 
         console.log(`[Puppeteer] Launching with options:`, JSON.stringify(options));
+        console.log(`[Puppeteer] CWD:`, process.cwd());
+        console.log(`[Puppeteer] __dirname:`, __dirname);
         try {
             const browser = await puppeteer.launch(options);
             const page = await browser.newPage();
