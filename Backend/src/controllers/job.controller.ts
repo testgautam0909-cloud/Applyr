@@ -29,7 +29,7 @@ export const getJobs = async (req: Request, res: Response) => {
         const skip = (page - 1) * pageSize;
 
         const [jobs, total] = await Promise.all([
-            Job.find(query).sort({ appliedDate: -1 }).skip(skip).limit(pageSize),
+            Job.find(query).sort({ createdAt : -1 }).skip(skip).limit(pageSize),
             Job.countDocuments(query),
         ]);
 

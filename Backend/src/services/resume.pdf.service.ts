@@ -3,158 +3,158 @@ import path from 'path';
 import fs from 'fs';
 
 function findLocalChrome(): string | undefined {
-    const searchDirs = [
-        path.join(process.cwd(), '.cache', 'puppeteer'),
-        path.join(process.cwd(), '.puppeteer-cache'),
-        '/opt/render/.cache/puppeteer',
-    ];
+  const searchDirs = [
+    path.join(process.cwd(), '.cache', 'puppeteer'),
+    path.join(process.cwd(), '.puppeteer-cache'),
+    '/opt/render/.cache/puppeteer',
+  ];
 
-    for (const dir of searchDirs) {
-        if (!fs.existsSync(dir)) continue;
-        try {
-            const chromeDir = path.join(dir, 'chrome');
-            if (!fs.existsSync(chromeDir)) continue;
-            const versions = fs.readdirSync(chromeDir);
-            for (const ver of versions) {
-                const candidate = path.join(chromeDir, ver, 'chrome-linux64', 'chrome');
-                if (fs.existsSync(candidate)) {
-                    console.log(`[Puppeteer] Found Chrome at: ${candidate}`);
-                    return candidate;
-                }
-            }
-        } catch { }
-    }
-    return undefined;
+  for (const dir of searchDirs) {
+    if (!fs.existsSync(dir)) continue;
+    try {
+      const chromeDir = path.join(dir, 'chrome');
+      if (!fs.existsSync(chromeDir)) continue;
+      const versions = fs.readdirSync(chromeDir);
+      for (const ver of versions) {
+        const candidate = path.join(chromeDir, ver, 'chrome-linux64', 'chrome');
+        if (fs.existsSync(candidate)) {
+          console.log(`[Puppeteer] Found Chrome at: ${candidate}`);
+          return candidate;
+        }
+      }
+    } catch { }
+  }
+  return undefined;
 }
 
 export class ResumePDFService {
 
-    private fmt(d: string): string {
-        if (!d) return '';
-        if (d.toLowerCase() === 'present') return 'Present';
-        const dt = new Date(d);
-        return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+  private fmt(d: string): string {
+    if (!d) return '';
+    if (d.toLowerCase() === 'present') return 'Present';
+    const dt = new Date(d);
+    return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+  }
+
+  private str(val: any): string {
+    if (!val) return '';
+    if (typeof val === 'string') return val.trim();
+    if (typeof val === 'object') {
+      const candidate = val.text ?? val.bullet ?? val.content ?? val.description ?? val.value ?? '';
+      return String(candidate).trim();
     }
+    return String(val).trim();
+  }
 
-    private str(val: any): string {
-        if (!val) return '';
-        if (typeof val === 'string') return val.trim();
-        if (typeof val === 'object') {
-            const candidate = val.text ?? val.bullet ?? val.content ?? val.description ?? val.value ?? '';
-            return String(candidate).trim();
-        }
-        return String(val).trim();
-    }
+  private cleanSummary(text: string): string {
+    return text
+      .replace(/^\s*[\*\-•]\s*/gm, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/\n{2,}/g, ' ')
+      .replace(/\n/g, ' ')
+      .trim();
+  }
 
-    private cleanSummary(text: string): string {
-        return text
-            .replace(/^\s*[\*\-•]\s*/gm, '')
-            .replace(/\*\*(.*?)\*\*/g, '$1')
-            .replace(/\*(.*?)\*/g, '$1')
-            .replace(/\n{2,}/g, ' ')
-            .replace(/\n/g, ' ')
-            .trim();
-    }
+  private highlights(arr: any[]): string[] {
+    if (!Array.isArray(arr)) return [];
+    return arr.map(h => this.str(h)).filter(h => h.length > 0);
+  }
 
-    private highlights(arr: any[]): string[] {
-        if (!Array.isArray(arr)) return [];
-        return arr.map(h => this.str(h)).filter(h => h.length > 0);
-    }
+  private normalizeSkills(skills: any): any[] {
+    if (!skills) return [];
+    if (Array.isArray(skills)) return skills;
+    if (Array.isArray(skills.skills)) return skills.skills;
+    return [];
+  }
 
-    private normalizeSkills(skills: any): any[] {
-        if (!skills) return [];
-        if (Array.isArray(skills)) return skills;
-        if (Array.isArray(skills.skills)) return skills.skills;
-        return [];
-    }
+  private normalizeAwards(awards: any): any[] {
+    if (!awards) return [];
+    if (Array.isArray(awards)) return awards;
+    if (Array.isArray(awards.awards)) return awards.awards;
+    return [];
+  }
 
-    private normalizeAwards(awards: any): any[] {
-        if (!awards) return [];
-        if (Array.isArray(awards)) return awards;
-        if (Array.isArray(awards.awards)) return awards.awards;
-        return [];
-    }
-
-    private normalizeCerts(certs: any): any[] {
-        if (!certs) return [];
-        if (Array.isArray(certs)) return certs;
-        if (Array.isArray(certs.certificates)) return certs.certificates;
-        return [];
-    }
+  private normalizeCerts(certs: any): any[] {
+    if (!certs) return [];
+    if (Array.isArray(certs)) return certs;
+    if (Array.isArray(certs.certificates)) return certs.certificates;
+    return [];
+  }
 
 
-    private mapData(resume: any) {
-        const basics = resume.basics ?? {};
-        const loc = basics.location;
-        return {
-            name: this.str(basics.name),
-            label: this.str(basics.label),
-            email: this.str(basics.email),
-            phone: this.str(basics.phone),
-            location: typeof loc === 'string'
-                ? loc
-                : loc ? [loc.city, loc.region, loc.countryCode].filter(Boolean).join(', ')
-                    : '',
-            url: this.str(basics.url),
-            profiles: basics.profiles ?? [],
-            summary: this.cleanSummary(this.str(basics.summary)),
-            skills: this.normalizeSkills(resume.skills),
-            work: resume.work ?? [],
-            projects: resume.projects ?? [],
-            education: resume.education ?? [],
-            awards: this.normalizeAwards(resume.awards),
-            certificates: this.normalizeCerts(resume.certificates),
-        };
-    }
+  private mapData(resume: any) {
+    const basics = resume.basics ?? {};
+    const loc = basics.location;
+    return {
+      name: this.str(basics.name),
+      label: this.str(basics.label),
+      email: this.str(basics.email),
+      phone: this.str(basics.phone),
+      location: typeof loc === 'string'
+        ? loc
+        : loc ? [loc.city, loc.region, loc.countryCode].filter(Boolean).join(', ')
+          : '',
+      url: this.str(basics.url),
+      profiles: basics.profiles ?? [],
+      summary: this.cleanSummary(this.str(basics.summary)),
+      skills: this.normalizeSkills(resume.skills),
+      work: resume.work ?? [],
+      projects: resume.projects ?? [],
+      education: resume.education ?? [],
+      awards: this.normalizeAwards(resume.awards),
+      certificates: this.normalizeCerts(resume.certificates),
+    };
+  }
 
-    private contactLine(r: ReturnType<typeof this.mapData>): string {
-        const parts: string[] = [];
-        if (r.email) parts.push(r.email);
-        if (r.phone) parts.push(r.phone);
-        if (r.location) parts.push(r.location);
+  private contactLine(r: ReturnType<typeof this.mapData>): string {
+    const parts: string[] = [];
+    if (r.email) parts.push(r.email);
+    if (r.phone) parts.push(r.phone);
+    if (r.location) parts.push(r.location);
 
-        const linkedin = r.profiles.find((p: any) =>
-            p.network?.toLowerCase().includes('linkedin') ||
-            p.url?.toLowerCase().includes('linkedin'));
-        if (linkedin?.url)
-            parts.push(`<a href="${this.str(linkedin.url)}">LinkedIn</a>`);
+    const linkedin = r.profiles.find((p: any) =>
+      p.network?.toLowerCase().includes('linkedin') ||
+      p.url?.toLowerCase().includes('linkedin'));
+    if (linkedin?.url)
+      parts.push(`<a href="${this.str(linkedin.url)}">LinkedIn</a>`);
 
-        const github = r.profiles.find((p: any) =>
-            p.network?.toLowerCase().includes('github') ||
-            p.url?.toLowerCase().includes('github'));
-        if (github?.url)
-            parts.push(`<a href="${this.str(github.url)}">GitHub</a>`);
+    const github = r.profiles.find((p: any) =>
+      p.network?.toLowerCase().includes('github') ||
+      p.url?.toLowerCase().includes('github'));
+    if (github?.url)
+      parts.push(`<a href="${this.str(github.url)}">GitHub</a>`);
 
-        if (r.url && !r.url.includes('linkedin') && !r.url.includes('github'))
-            parts.push(`<a href="${r.url}">Portfolio</a>`);
+    if (r.url && !r.url.includes('linkedin') && !r.url.includes('github'))
+      parts.push(`<a href="${r.url}">Portfolio</a>`);
 
-        return parts.join(' &nbsp;|&nbsp; ');
-    }
+    return parts.join(' &nbsp;|&nbsp; ');
+  }
 
-    private md(t: string): string {
-        return (t || '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    }
+  private md(t: string): string {
+    return (t || '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  }
 
-    private buildHTML(resume: any): string {
-        const r = this.mapData(resume);
-        const fmt = this.fmt.bind(this);
-        const md = this.md.bind(this);
+  private buildHTML(resume: any): string {
+    const r = this.mapData(resume);
+    const fmt = this.fmt.bind(this);
+    const md = this.md.bind(this);
 
-        const MAX_BULLETS_SENIOR = 7;
-        const MAX_BULLETS_JUNIOR = 6;
-        const MAX_BULLETS_PROJECT = 4;
-        const MAX_PROJECTS = 2;
-        const MAX_SKILLS_CATS = 5;
+    const MAX_BULLETS_SENIOR = 7;
+    const MAX_BULLETS_JUNIOR = 6;
+    const MAX_BULLETS_PROJECT = 4;
+    const MAX_PROJECTS = 2;
+    const MAX_SKILLS_CATS = 5;
 
-        const skillsHTML = r.skills.slice(0, MAX_SKILLS_CATS).map((s: any) => {
-            const keywords = (s.keywords ?? s.skills ?? []).join(', ');
-            return `<div class="skill-line"><strong>${s.name ?? s.category}:</strong> ${keywords}</div>`;
-        }).join('');
-        const workHTML = r.work.map((j: any, idx: number) => {
-            const maxBullets = idx === 0 ? MAX_BULLETS_SENIOR : MAX_BULLETS_JUNIOR;
-            const bullets = this.highlights(j.highlights ?? []).slice(0, maxBullets);
-            const endLabel = (!j.endDate || j.endDate.toLowerCase() === 'present') ? 'Present' : fmt(j.endDate);
-            return `
+    const skillsHTML = r.skills.slice(0, MAX_SKILLS_CATS).map((s: any) => {
+      const keywords = (s.keywords ?? s.skills ?? []).join(', ');
+      return `<div class="skill-line"><strong>${s.name ?? s.category}:</strong> ${keywords}</div>`;
+    }).join('');
+    const workHTML = r.work.map((j: any, idx: number) => {
+      const maxBullets = idx === 0 ? MAX_BULLETS_SENIOR : MAX_BULLETS_JUNIOR;
+      const bullets = this.highlights(j.highlights ?? []).slice(0, maxBullets);
+      const endLabel = (!j.endDate || j.endDate.toLowerCase() === 'present') ? 'Present' : fmt(j.endDate);
+      return `
 <div class="entry">
   <div class="row">
     <span class="company">${j.company ?? j.name ?? ''}</span>
@@ -166,11 +166,11 @@ export class ResumePDFService {
   </div>
   ${bullets.length ? `<ul>${bullets.map(h => `<li>${md(h)}</li>`).join('')}</ul>` : ''}
 </div>`;
-        }).join('');
+    }).join('');
 
-        const projectsHTML = r.projects.slice(0, MAX_PROJECTS).map((p: any) => {
-            const bullets = this.highlights(p.highlights ?? []).slice(0, MAX_BULLETS_PROJECT);
-            return `
+    const projectsHTML = r.projects.slice(0, MAX_PROJECTS).map((p: any) => {
+      const bullets = this.highlights(p.highlights ?? []).slice(0, MAX_BULLETS_PROJECT);
+      return `
 <div class="entry">
   <div class="row">
     <span class="company">${p.name ?? ''}</span>
@@ -179,9 +179,9 @@ export class ResumePDFService {
   ${p.description ? `<p class="proj-desc">${md(p.description)}</p>` : ''}
   ${bullets.length ? `<ul>${bullets.map(h => `<li>${md(h)}</li>`).join('')}</ul>` : ''}
 </div>`;
-        }).join('');
+    }).join('');
 
-        const educationHTML = r.education.map((e: any) => `
+    const educationHTML = r.education.map((e: any) => `
 <div class="entry">
   <div class="row">
     <span class="company">${e.institution ?? ''}</span>
@@ -192,19 +192,19 @@ export class ResumePDFService {
   </div>
 </div>`).join('');
 
-        const certsHTML = r.certificates.length
-            ? `<ul>${r.certificates.map((c: any) =>
-                `<li>${c.name}${c.issuer ? ' — ' + c.issuer : ''}${c.date ? ' (' + fmt(c.date) + ')' : ''}</li>`
-            ).join('')}</ul>`
-            : '';
+    const certsHTML = r.certificates.length
+      ? `<ul>${r.certificates.map((c: any) =>
+        `<li>${c.name}${c.issuer ? ' — ' + c.issuer : ''}${c.date ? ' (' + fmt(c.date) + ')' : ''}</li>`
+      ).join('')}</ul>`
+      : '';
 
-        const awardsHTML = r.awards.length
-            ? `<ul>${r.awards.map((a: any) =>
-                `<li>${a.title ?? ''}${a.awarder ? ' — ' + a.awarder : ''}${a.date ? ' (' + fmt(a.date) + ')' : ''}</li>`
-            ).join('')}</ul>`
-            : '';
+    const awardsHTML = r.awards.length
+      ? `<ul>${r.awards.map((a: any) =>
+        `<li>${a.title ?? ''}${a.awarder ? ' — ' + a.awarder : ''}${a.date ? ' (' + fmt(a.date) + ')' : ''}</li>`
+      ).join('')}</ul>`
+      : '';
 
-        return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -341,50 +341,50 @@ ${awardsHTML ? `
 
 </body>
 </html>`;
+  }
+
+  async generate(resumeJSON: any): Promise<string> {
+
+    const outputPath = path.join(process.cwd(), `output_${Date.now()}.pdf`);
+    const options: any = {
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ],
+    };
+
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    } else {
+      const localChrome = findLocalChrome();
+      if (localChrome) {
+        options.executablePath = localChrome;
+      }
     }
 
-    async generate(resumeJSON: any): Promise<string> {
-
-        const outputPath = path.join(process.cwd(), `output_${Date.now()}.pdf`);
-        const options: any = {
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--no-first-run',
-                '--no-zygote',
-                '--single-process',
-                '--disable-gpu'
-            ],
-        };
-
-        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-            options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-        } else {
-            const localChrome = findLocalChrome();
-            if (localChrome) {
-                options.executablePath = localChrome;
-            }
-        }
-
-        console.log(`[Puppeteer] Launching with options:`, JSON.stringify(options));
-        console.log(`[Puppeteer] CWD:`, process.cwd());
-        try {
-            const browser = await puppeteer.launch(options);
-            const page = await browser.newPage();
-            await page.setContent(this.buildHTML(resumeJSON), { waitUntil: 'networkidle0' });
-            await page.pdf({
-                path: outputPath,
-                format: 'A4',
-                printBackground: true,
-                margin: { top: '0.45in', right: '0.55in', bottom: '0.45in', left: '0.55in' },
-            });
-            await browser.close();
-        } catch (error: any) {
-            console.error(`[Puppeteer] Execution failed: ${error.message}`);
-            throw error;
-        }
-        return outputPath;
+    console.log(`[Puppeteer] Launching with options:`, JSON.stringify(options));
+    console.log(`[Puppeteer] CWD:`, process.cwd());
+    try {
+      const browser = await puppeteer.launch(options);
+      const page = await browser.newPage();
+      await page.setContent(this.buildHTML(resumeJSON), { waitUntil: 'networkidle0', timeout: 90000 });
+      await page.pdf({
+        path: outputPath,
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '0.45in', right: '0.55in', bottom: '0.45in', left: '0.55in' },
+      });
+      await browser.close();
+    } catch (error: any) {
+      console.error(`[Puppeteer] Execution failed: ${error.message}`);
+      throw error;
     }
+    return outputPath;
+  }
 }

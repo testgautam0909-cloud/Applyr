@@ -6,7 +6,7 @@ import { JobApplication, JobStatus } from '../models/job.model';
 interface JobsState {
     searchTerm: string;
     statusFilter: JobStatus[];
-    sortColumn: keyof JobApplication;
+    sortColumn: keyof JobApplication | 'createdAt';
     sortDirection: 'asc' | 'desc';
     pageSize: number;
     currentPage: number;
@@ -15,7 +15,7 @@ interface JobsState {
 const INITIAL_STATE: JobsState = {
     searchTerm: '',
     statusFilter: [],
-    sortColumn: 'appliedDate',
+    sortColumn: 'createdAt',
     sortDirection: 'desc',
     pageSize: 10,
     currentPage: 0,

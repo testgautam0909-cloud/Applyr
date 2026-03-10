@@ -35,6 +35,7 @@ export interface JobApplication {
     poc: PointOfContact[];
     jobDescription: string;
     sourcePlatform: string;
+    createdAt?: string;
 }
 
 export interface UpdateJobPayload {

@@ -132,7 +132,7 @@ Return ONLY valid JSON with this structure:
         try {
             const browser = await puppeteer.launch(options);
             const page = await browser.newPage();
-            await page.setContent(html, { waitUntil: 'networkidle0' });
+            await page.setContent(html, { waitUntil: 'networkidle0', timeout: 90000 });
             await page.pdf({ path: outputPath, format: 'A4', printBackground: true });
             await browser.close();
         } catch (error: any) {
