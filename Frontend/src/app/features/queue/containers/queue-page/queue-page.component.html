@@ -1,0 +1,110 @@
+<div class="container-fluid py-5 px-md-5">
+
+    <!-- Analytics Cards -->
+    <div class="row g-4 mb-4 fade-in">
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Total Queue</h6>
+                        <h2 class="mb-0 fw-bold">{{ items().length }}</h2>
+                    </div>
+                    <div class="stat-icon bg-primary text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-collection-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Pending</h6>
+                        <h2 class="mb-0 fw-bold text-warning">{{ pendingCount() }}</h2>
+                    </div>
+                    <div class="stat-icon bg-warning text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-hourglass-split fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Completed</h6>
+                        <h2 class="mb-0 fw-bold text-success">{{ completedCount() }}</h2>
+                    </div>
+                    <div class="stat-icon bg-success text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-check-circle-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold">Failed</h6>
+                        <h2 class="mb-0 fw-bold text-danger">{{ failedCount() }}</h2>
+                    </div>
+                    <div class="stat-icon bg-danger text-white rounded-circle d-flex"
+                        style="width: 48px; height: 48px; justify-content: center; align-items: center;">
+                        <i class="bi bi-x-circle-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Area -->
+    <div class="glass-card mb-5 p-4 fade-in" style="animation-delay: 0.1s;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn filter-pill shadow-none"
+                    [class.active]="!activeFilter()" (click)="setFilter(null)">
+                    All
+                    <span class="count">{{ items().length }}</span>
+                </button>
+                <button *ngFor="let status of statusOptions" class="btn filter-pill shadow-none"
+                    [class.active]="activeFilter() === status" (click)="setFilter(status)">
+                    {{ status }}
+                    <span class="count" *ngIf="status === 'pending'">{{ pendingCount() }}</span>
+                    <span class="count" *ngIf="status === 'completed'">{{ completedCount() }}</span>
+                    <span class="count" *ngIf="status === 'failed'">{{ failedCount() }}</span>
+                </button>
+            </div>
+            <button class="btn btn-refresh shadow-none" (click)="refresh()" title="Refresh queue">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="fade-in p-1" style="animation-delay: 0.2s;">
+        <!-- Loading State -->
+        <div *ngIf="loading()" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error() as error" class="glass-card p-4 text-center">
+            <i class="bi bi-exclamation-triangle-fill text-danger fs-3"></i>
+            <p class="text-danger mt-2 mb-0">{{ error }}</p>
+            <button class="btn btn-sm btn-outline-primary mt-3" (click)="refresh()">Retry</button>
+        </div>
+
+        <!-- Queue Table -->
+        <app-queue-table
+            *ngIf="!loading() && !error()"
+            [items]="filteredItems()"
+            (delete)="onDeleteItem($event)"
+            (retry)="onRetryItem($event)">
+        </app-queue-table>
+    </div>
+</div>

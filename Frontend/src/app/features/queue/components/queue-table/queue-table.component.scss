@@ -1,0 +1,112 @@
+@use '../../../../../styles/abstracts/variables' as v;
+
+.table {
+    th {
+        background: var(--glass-bg);
+        color: var(--text-muted);
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--glass-border);
+        vertical-align: middle;
+    }
+}
+
+.queue-row {
+    transition: background 0.15s ease;
+
+    &:hover {
+        background: var(--primary-glow);
+    }
+}
+
+.url-link {
+    color: var(--primary-vibrant);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+
+    &:hover {
+        color: darken(#7C3AED, 10%);
+        text-decoration: underline;
+    }
+}
+
+.exec-link {
+    color: var(--secondary-accent);
+    font-weight: 500;
+
+    &:hover {
+        color: darken(#06B6D4, 10%);
+    }
+}
+
+.status-badge {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    display: inline-block;
+}
+
+.badge-pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #D97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-completed {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-failed {
+    background: rgba(239, 68, 68, 0.12);
+    color: #DC2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #DC2626;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-retry:hover {
+    background: rgba(245, 158, 11, 0.1);
+    color: #D97706;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.empty-state {
+    padding: 40px 0;
+    opacity: 0.6;
+}

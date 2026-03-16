@@ -1,0 +1,58 @@
+@use '../../../../../styles/abstracts/variables' as v;
+
+.filter-pill {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    text-transform: capitalize;
+
+    .count {
+        background: var(--bg-app);
+        color: var(--text-muted);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+    }
+
+    &:hover {
+        background: var(--bg-app);
+        border-color: var(--primary-vibrant);
+    }
+
+    &.active {
+        background: var(--primary-vibrant);
+        color: white;
+        border-color: var(--primary-vibrant);
+
+        .count {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+    }
+}
+
+.btn-refresh {
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--card-bg);
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: var(--bg-app);
+        border-color: var(--primary-vibrant);
+        color: var(--primary-vibrant);
+        transform: translateY(-1px);
+    }
+}

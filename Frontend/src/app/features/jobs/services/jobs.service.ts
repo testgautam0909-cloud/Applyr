@@ -28,10 +28,6 @@ export class JobsService {
     readonly isEmpty = computed(() => this._jobs().length === 0 && this._total() === 0);
     readonly apiBaseUrl = environment.apiUrl;
 
-    constructor() {
-        this.fetchJobs({ page: 1, pageSize: 10 });
-    }
-
     async fetchJobs(params?: { search?: string; status?: string[]; page?: number; pageSize?: number }) {
         this._loading.set(true);
         this._error.set(null);

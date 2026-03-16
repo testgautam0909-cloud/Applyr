@@ -9,7 +9,6 @@ export const getJobs = async (req: Request, res: Response) => {
     try {
         const { search, status, page: rawPage, pageSize: rawPageSize } = req.query;
         let query: any = {};
-
         if (search) {
             const searchRegex = new RegExp(search as string, 'i');
             query.$or = [

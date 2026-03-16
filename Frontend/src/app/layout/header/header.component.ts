@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
@@ -7,22 +8,43 @@ import { ThemeService } from '../../core/services/theme.service';
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
+    RouterLinkActive,
   ],
   template: `
     <header class="glass-header sticky-top">
       <div class="container-fluid px-md-5">
         <div class="header-inner d-flex justify-content-between align-items-center">
-          <div class="brand-section d-flex align-items-center gap-3">
-            <div class="logo-box">
-                <i class="bi bi-rocket-takeoff-fill text-white"></i>
+          <div class="d-flex align-items-center gap-4">
+            <div class="brand-section d-flex align-items-center gap-3">
+              <div class="logo-box">
+                  <i class="bi bi-rocket-takeoff-fill text-white"></i>
+              </div>
+              <div>
+                  <h1 class="brand-title mb-0">Applyr</h1>
+                  <p class="brand-tagline small mb-0 d-none d-md-block">AI-Powered Job Tracking</p>
+              </div>
             </div>
-            <div>
-                <h1 class="brand-title mb-0">Applyr</h1>
-                <p class="brand-tagline small mb-0 d-none d-md-block">AI-Powered Job Tracking</p>
-            </div>
+            <nav class="nav-tabs-header d-flex align-items-center gap-1 ms-3 d-none d-md-flex">
+              <a routerLink="/jobs" routerLinkActive="active" class="nav-tab">
+                <i class="bi bi-briefcase-fill me-1"></i> Jobs
+              </a>
+              <a routerLink="/queue" routerLinkActive="active" class="nav-tab">
+                <i class="bi bi-collection-fill me-1"></i> Queue
+              </a>
+            </nav>
           </div>
           
           <div class="actions-section d-flex align-items-center gap-2">
+            <!-- Mobile Nav -->
+            <div class="d-flex d-md-none gap-1">
+              <a routerLink="/jobs" routerLinkActive="active" class="btn-mobile-nav" title="Jobs">
+                <i class="bi bi-briefcase-fill"></i>
+              </a>
+              <a routerLink="/queue" routerLinkActive="active" class="btn-mobile-nav" title="Queue">
+                <i class="bi bi-collection-fill"></i>
+              </a>
+            </div>
             <button 
               class="btn-theme-toggle"
               (click)="toggleTheme()"
@@ -80,6 +102,52 @@ import { ThemeService } from '../../core/services/theme.service';
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+    }
+
+    .nav-tabs-header {
+        border-left: 1px solid var(--glass-border);
+        padding-left: 16px;
+    }
+
+    .nav-tab {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: var(--bg-app);
+            color: var(--primary-vibrant);
+        }
+
+        &.active {
+            background: var(--primary-glow);
+            color: var(--primary-vibrant);
+        }
+    }
+
+    .btn-mobile-nav {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid var(--glass-border);
+        background: var(--card-bg);
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+
+        &:hover, &.active {
+            background: var(--primary-glow);
+            color: var(--primary-vibrant);
+            border-color: var(--primary-vibrant);
+        }
     }
 
     .btn-theme-toggle {

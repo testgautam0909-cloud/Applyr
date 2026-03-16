@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { JobsStore } from '../../store/jobs.store';
 import { JobsService } from '../../services/jobs.service';
@@ -24,12 +24,16 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
     styleUrl: './jobs-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class JobsPageComponent {
+export class JobsPageComponent implements OnInit {
     protected readonly store = inject(JobsStore);
     protected readonly service = inject(JobsService);
     private readonly dialog = inject(MatDialog);
 
     protected readonly statusOptions = Object.values(JobStatus);
+
+    ngOnInit(): void {
+        this.store.refresh();
+    }
 
     protected onSearch(event: Event): void {
         const value = (event.target as HTMLInputElement).value;

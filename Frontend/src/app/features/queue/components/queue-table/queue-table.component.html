@@ -1,0 +1,62 @@
+<div class="table-responsive glass-card">
+    <table class="table table-hover align-middle mb-0">
+        <thead>
+            <tr>
+                <th class="ps-4">URL</th>
+                <th>Status</th>
+                <th>Execution URL</th>
+                <th>Created</th>
+                <th class="text-end pe-4">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngIf="items.length === 0">
+                <td colspan="5" class="text-center py-5">
+                    <div class="empty-state">
+                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                        <p class="text-muted mt-2 mb-0">No items in the queue</p>
+                    </div>
+                </td>
+            </tr>
+            <tr *ngFor="let item of items" class="queue-row">
+                <td class="ps-4">
+                    <a [href]="item.url" target="_blank" rel="noopener" class="url-link" [title]="item.url">
+                        <i class="bi bi-link-45deg me-1"></i>
+                        {{ truncateUrl(item.url) }}
+                    </a>
+                </td>
+                <td>
+                    <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                        {{ getStatusLabel(item.status) }}
+                    </span>
+                </td>
+                <td>
+                    <ng-container *ngIf="item.executionURL; else noExecUrl">
+                        <a [href]="item.executionURL" target="_blank" rel="noopener" class="url-link exec-link" [title]="item.executionURL">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>
+                            {{ truncateUrl(item.executionURL, 40) }}
+                        </a>
+                    </ng-container>
+                    <ng-template #noExecUrl>
+                        <span class="text-muted">—</span>
+                    </ng-template>
+                </td>
+                <td>
+                    <span class="text-muted small">{{ formatDate(item.createdAt) }}</span>
+                </td>
+                <td class="text-end pe-4">
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button *ngIf="item.status === 'failed'" class="btn btn-sm btn-action btn-retry" title="Retry"
+                            (click)="retry.emit(item)">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button class="btn btn-sm btn-action btn-delete" title="Delete"
+                            (click)="delete.emit(item)">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
